@@ -8,6 +8,7 @@
 |-------|-----|
 | 🎥 **Demo video (3 min)** | _(YouTube link added before submission)_ |
 | 📦 **Public code** | https://github.com/alcastaro/kjognis-lite (branch `kognis_lite`) |
+| 📱 **APK download** | **https://github.com/alcastaro/kjognis-lite/releases/tag/v1.0-hackathon** (~272 MB, install via `adb install -r`) |
 | 📄 **Writeup** | [`KAGGLE_WRITEUP.md`](./KAGGLE_WRITEUP.md) |
 | 📓 **Notebook** | [`notebooks/kognis_lite_sar_demo.ipynb`](./notebooks/kognis_lite_sar_demo.ipynb) |
 | 📱 **Live demo (APK + install instructions)** | See [Quickstart](#quickstart) below |

@@ -1,5 +1,9 @@
 # Kognis Lite — Offline Humanitarian Field Assistant
 
+> 📱 **Hackathon APK release:** **[v1.0-hackathon](https://github.com/alcastaro/kjognis-lite/releases/tag/v1.0-hackathon)** (~272 MB · install via `adb install -r`)
+> 🎥 Demo video: _(YouTube link added before submission)_
+> 📓 Notebook companion: [`notebooks/kognis_lite_sar_demo.ipynb`](./notebooks/kognis_lite_sar_demo.ipynb)
+
 > **AI assistant for civil search-and-rescue, civil protection, and emergency medical responders operating in areas without connectivity.**
 
 Built for the **Gemma 4 Good Hackathon** — Global Resilience track + LiteRT Special.
