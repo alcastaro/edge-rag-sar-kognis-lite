@@ -79,10 +79,17 @@ class LearningOrchestrator(
     // ── Per-turn hooks ────────────────────────────────────────────────────
 
     /** Build the per-turn system prompt for the LLM. Called by FieldAssistantService. */
-    fun systemPromptForActiveSession(): String? {
+    fun systemPromptForActiveSession(overrideLanguage: String? = null): String? {
         val sid = activeSessionId
         if (sid == 0L) return null
-        return LearningPromptBuilder.build(store, sid, activeLanguage, activeCurriculumId)
+        val lang = overrideLanguage ?: activeLanguage
+        return LearningPromptBuilder.build(store, sid, lang, activeCurriculumId)
+    }
+
+    /** Update active language mid-session (e.g. when user toggles app language). */
+    fun setLanguage(lang: String) {
+        activeLanguage = lang
+        store.setPref(LearningPreferenceKeys.LANGUAGE, lang)
     }
 
     fun appendUserTurn(text: String) {

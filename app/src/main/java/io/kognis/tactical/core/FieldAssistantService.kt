@@ -92,7 +92,24 @@ class FieldAssistantService : Service() {
                     var effectiveQuery = query
                     var effectiveMode = mode
                     if (trainingActive) {
-                        orchestrator.customSystemPrompt = learning!!.systemPromptForActiveSession()
+                        // Detect language from the user's message itself so the model
+                        // always replies in the language of the query, regardless of the
+                        // app-wide setting. Spanish markers (accents + common stopwords)
+                        // are strong signal; otherwise default to English.
+                        val sample = query.take(200).lowercase()
+                        val spanishMarker = Regex("[áéíóúñ¿¡]|\\b(qué|cómo|cuál|protocolo|enséñame|háblame|cuándo|estoy|tengo|hola|gracias|ejemplo|también|aprender|entiendo|sí|por favor)\\b")
+                        val englishMarker = Regex("\\b(the|is|are|how|what|please|teach|learn|example|protocol|show|give|tell|me|can|you|i)\\b")
+                        val spCount = spanishMarker.findAll(sample).count()
+                        val enCount = englishMarker.findAll(sample).count()
+                        val perTurnLang = when {
+                            spCount > enCount -> "es"
+                            enCount > spCount -> "en"
+                            else -> currentLang   // tie → app pref
+                        }
+                        Log.d(TAG, "Training language detected: $perTurnLang (sp=$spCount en=$enCount)")
+                        learning!!.setLanguage(perTurnLang)
+                        orchestrator.language = perTurnLang
+                        orchestrator.customSystemPrompt = learning.systemPromptForActiveSession(perTurnLang)
                         learning.appendUserTurn(query)
                         learningBuffer.clear()
                         // Force RAG ON during training — corpus is the authoritative source
