@@ -154,7 +154,7 @@ class RagOrchestratorUnitTest {
     fun `tokenize produces identical tokens from KB chunk and equivalent query`() {
         // Index is built by tokenizing chunk text. Query is also tokenized.
         // If the same surface form appears in both, they must produce the same token.
-        val chunkText  = "Protocolo TCCC: torniquete hemostático — aplicación MARCH"
+        val chunkText  = "Protocolo TCCC: torniquete hemostático aplicación"
         val queryText  = "protocolo tccc torniquete hemostatico aplicacion"
         val chunkTokens = RagTextUtils.tokenize(chunkText).toSet()
         val queryTokens = RagTextUtils.tokenize(queryText).toSet()

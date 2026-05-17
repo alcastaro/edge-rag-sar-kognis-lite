@@ -52,6 +52,7 @@ import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.FlashOff
+import androidx.compose.ui.zIndex
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -1085,7 +1086,10 @@ class MainActivity : ComponentActivity() {
 
                     androidx.compose.material3.Divider(color = androidx.compose.ui.graphics.Color.DarkGray, modifier = Modifier.padding(bottom = 16.dp))
 
-                    Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable { showSettingsMenu = false; showMapScreen = true }, verticalAlignment = Alignment.CenterVertically) { Icon(painterResource(android.R.drawable.ic_menu_mapmode), null, tint=androidx.compose.ui.graphics.Color.White); Spacer(Modifier.width(16.dp)); Text(stringResource(R.string.update_map), color=androidx.compose.ui.graphics.Color.White, style = MaterialTheme.typography.bodyLarge) }
+                    Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable {
+                        showSettingsMenu = false
+                        markerImportLauncher.launch(arrayOf("application/json", "*/*"))
+                    }, verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Default.CloudUpload, null, tint=androidx.compose.ui.graphics.Color.White); Spacer(Modifier.width(16.dp)); Column { Text("Import map markers", color=androidx.compose.ui.graphics.Color.White, style = MaterialTheme.typography.bodyLarge); Text("Load locations from JSON (same format as export)", color=androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.labelSmall) } }
 
                     androidx.compose.material3.Divider(color = androidx.compose.ui.graphics.Color.DarkGray, modifier = Modifier.padding(vertical = 4.dp))
                     Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable { showSettingsMenu = false; showWaitlistDialog = true }, verticalAlignment = Alignment.CenterVertically) { Icon(painterResource(android.R.drawable.ic_menu_camera), null, tint=androidx.compose.ui.graphics.Color.Gray); Spacer(Modifier.width(16.dp)); Text(stringResource(R.string.camera) + " (v1.1)", color=androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.bodyLarge) }
@@ -1455,63 +1459,69 @@ class MainActivity : ComponentActivity() {
                 onDismissRequest = { showMapScreen = false },
                 properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
             ) {
-                Column(modifier = Modifier.fillMaxSize().statusBarsPadding().background(io.kognis.tactical.ui.theme.MachinedGraphite)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            stringResource(R.string.map_markers_title),
-                            color = io.kognis.tactical.ui.theme.RescueAmber,
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(start = 8.dp),
+                // Box layout so toolbar Surface (with shadow elevation) stays above the AndroidView map.
+                Box(modifier = Modifier.fillMaxSize().statusBarsPadding().background(io.kognis.tactical.ui.theme.MachinedGraphite)) {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        // 56dp toolbar slot reserves space; map fills the rest.
+                        Spacer(Modifier.height(56.dp))
+                        io.kognis.tactical.core.map.MapFallbackViewMulti(
+                            markers = io.kognis.tactical.core.map.MarkerStore.markers,
+                            modifier = Modifier.fillMaxSize(),
+                            onClear = { io.kognis.tactical.core.map.MarkerStore.clear() },
                         )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            val ctx = androidx.compose.ui.platform.LocalContext.current
-                            val hasMarkers = io.kognis.tactical.core.map.MarkerStore.markers.isNotEmpty()
-                            // Export GPX
-                            IconButton(
-                                onClick = {
-                                    val result = io.kognis.tactical.core.map.GpxExporter.export(ctx)
-                                    if (result != null) ctx.startActivity(io.kognis.tactical.core.map.GpxExporter.shareIntent(ctx, result))
-                                },
-                                enabled = hasMarkers,
-                            ) {
-                                Icon(
-                                    Icons.Default.Share,
-                                    contentDescription = "Exportar GPX",
-                                    tint = if (hasMarkers) io.kognis.tactical.ui.theme.RescueAmber else androidx.compose.ui.graphics.Color.DarkGray,
-                                )
-                            }
-                            // Export JSON (WhatsApp / share)
-                            IconButton(
-                                onClick = {
-                                    val result = io.kognis.tactical.core.map.JsonMarkerExporter.export(ctx)
-                                    if (result != null) ctx.startActivity(io.kognis.tactical.core.map.JsonMarkerExporter.shareIntent(ctx, result))
-                                },
-                                enabled = hasMarkers,
-                            ) {
-                                Icon(
-                                    Icons.Default.Dataset,
-                                    contentDescription = "Exportar JSON",
-                                    tint = if (hasMarkers) io.kognis.tactical.ui.theme.RescueAmber else androidx.compose.ui.graphics.Color.DarkGray,
-                                )
-                            }
-                            // Import JSON
-                            IconButton(onClick = { markerImportLauncher.launch(arrayOf("application/json", "*/*")) }) {
-                                Icon(Icons.Default.CloudUpload, contentDescription = "Importar marcadores JSON", tint = androidx.compose.ui.graphics.Color.LightGray)
-                            }
-                            IconButton(onClick = { showMapScreen = false }) {
-                                Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = androidx.compose.ui.graphics.Color.LightGray)
+                    }
+                    // Toolbar Surface — elevated above the map AndroidView so it never gets covered.
+                    androidx.compose.material3.Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .align(Alignment.TopCenter)
+                            .zIndex(10f),
+                        color = io.kognis.tactical.ui.theme.MachinedGraphite,
+                        shadowElevation = 6.dp,
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                stringResource(R.string.map_markers_title),
+                                color = io.kognis.tactical.ui.theme.RescueAmber,
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(start = 8.dp),
+                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                val ctx = androidx.compose.ui.platform.LocalContext.current
+                                val hasMarkers = io.kognis.tactical.core.map.MarkerStore.markers.isNotEmpty()
+                                // Share JSON markers — opens system share chooser (WhatsApp / email / file)
+                                IconButton(
+                                    onClick = {
+                                        val result = io.kognis.tactical.core.map.JsonMarkerExporter.export(ctx)
+                                        if (result != null) {
+                                            ctx.startActivity(io.kognis.tactical.core.map.JsonMarkerExporter.shareIntent(ctx, result))
+                                        } else {
+                                            android.widget.Toast.makeText(ctx, "No markers to share", android.widget.Toast.LENGTH_SHORT).show()
+                                        }
+                                    },
+                                    enabled = hasMarkers,
+                                ) {
+                                    Icon(
+                                        Icons.Default.Share,
+                                        contentDescription = "Share markers (JSON)",
+                                        tint = if (hasMarkers) io.kognis.tactical.ui.theme.RescueAmber else androidx.compose.ui.graphics.Color.DarkGray,
+                                    )
+                                }
+                                // Import JSON markers (same format as export)
+                                IconButton(onClick = { markerImportLauncher.launch(arrayOf("application/json", "*/*")) }) {
+                                    Icon(Icons.Default.CloudUpload, contentDescription = "Import markers (JSON)", tint = androidx.compose.ui.graphics.Color.LightGray)
+                                }
+                                IconButton(onClick = { showMapScreen = false }) {
+                                    Icon(Icons.Default.Close, contentDescription = "Close", tint = androidx.compose.ui.graphics.Color.LightGray)
+                                }
                             }
                         }
                     }
-                    io.kognis.tactical.core.map.MapFallbackViewMulti(
-                        markers = io.kognis.tactical.core.map.MarkerStore.markers,
-                        modifier = Modifier.fillMaxSize(),
-                        onClear = { io.kognis.tactical.core.map.MarkerStore.clear() },
-                    )
                 }
             }
         }
@@ -1845,20 +1855,6 @@ class MainActivity : ComponentActivity() {
                                                     }
                                                 }
                                                 
-                                                // Flashlight tool — agentic field utility (signaling, dark conditions)
-                                                val flashAvailable = remember { io.kognis.tactical.core.agent.FlashlightTool.isAvailable(this@MainActivity) }
-                                                if (flashAvailable) {
-                                                    IconButton(onClick = {
-                                                        flashlightOn = io.kognis.tactical.core.agent.FlashlightTool.toggle(this@MainActivity)
-                                                    }) {
-                                                        Icon(
-                                                            if (flashlightOn) Icons.Default.FlashOn else Icons.Default.FlashOff,
-                                                            contentDescription = "Flashlight",
-                                                            tint = if (flashlightOn) io.kognis.tactical.ui.theme.RescueAmber else androidx.compose.ui.graphics.Color.LightGray,
-                                                        )
-                                                    }
-                                                }
-
                                                 // Voice input agent — on-device speech-to-text → existing pipeline
                                                 if (voiceAgent.isAvailable()) {
                                                     IconButton(onClick = {
@@ -1906,10 +1902,19 @@ class MainActivity : ComponentActivity() {
                                                 if (isInGeneration.value) {
                                                     IconButton(onClick = { fieldCore?.cancelGeneration() }) { Icon(Icons.Default.Close, contentDescription = "Stop", tint = androidx.compose.ui.graphics.Color.Red) }
                                                 } else {
-                                                    val canSend = userInputFieldText.isNotBlank() && (isReady || llmLoaded)
+                                                    // Send always enabled when text non-blank. Downstream handles "not ready" gracefully.
+                                                    val canSend = userInputFieldText.isNotBlank()
                                                     IconButton(
-                                                        onClick = { if (canSend) { this@MainActivity.isInGeneration.value = true; sendText(userInputFieldText, currentRagMode); userInputFieldText = ""; chatHistoryFocusRequester.requestFocus() } },
-                                                        enabled = canSend
+                                                        onClick = {
+                                                            if (canSend) {
+                                                                val text = userInputFieldText
+                                                                this@MainActivity.isInGeneration.value = true
+                                                                sendText(text, currentRagMode)
+                                                                userInputFieldText = ""
+                                                                chatHistoryFocusRequester.requestFocus()
+                                                            }
+                                                        },
+                                                        enabled = canSend,
                                                     ) { Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send", tint = if (canSend) io.kognis.tactical.ui.theme.RescueAmber else androidx.compose.ui.graphics.Color.Gray) }
                                                 }
                                             }

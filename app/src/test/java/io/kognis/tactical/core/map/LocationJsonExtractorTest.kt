@@ -22,7 +22,7 @@ class LocationJsonExtractorTest {
 
     @Test
     fun `extracts tag with mixed case keyword`() {
-        val text = "Procede al norte.\nlocation_json: {\"lat\": 0.0, \"lon\": 0.0, \"label\": \"x\"}"
+        val text = "Procede al norte.\nlocation_json: {\"lat\": 18.4, \"lon\": -69.9, \"label\": \"x\"}"
         assertNotNull(LocationJsonExtractor.extract(text))
     }
 

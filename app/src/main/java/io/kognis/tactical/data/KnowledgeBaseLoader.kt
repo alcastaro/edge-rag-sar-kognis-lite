@@ -250,29 +250,58 @@ object KnowledgeBaseLoader {
                 c.chunkId?.ifBlank { contentHash(plainContent) } ?: contentHash(plainContent)
             }
 
-        val array = org.json.JSONArray(String(bytes, Charsets.UTF_8))
+        // Tolerate either a bare array OR an object wrapping an array under a few common keys.
+        val text = String(bytes, Charsets.UTF_8)
+        val array: org.json.JSONArray = runCatching { org.json.JSONArray(text) }.getOrElse {
+            val obj = org.json.JSONObject(text)
+            obj.optJSONArray("chunks")
+                ?: obj.optJSONArray("documents")
+                ?: obj.optJSONArray("data")
+                ?: throw IllegalArgumentException("JSON root must be array or contain chunks/documents/data array")
+        }
         var added = 0; var skipped = 0; var rejected = 0
 
         for (i in 0 until array.length()) {
             val obj = array.optJSONObject(i) ?: run { rejected++; continue }
-            val title = obj.optString("title", "")
-            val content = obj.optString("content", "")
-            val chunkId = obj.optString("chunk_id", "").ifBlank { contentHash(content) }
+
+            // Schema-tolerant field resolution. Supports:
+            //   v4 (manuales_base.json older): title, content, chunk_id, vector
+            //   v5 (current corpus + qa_embedded): id, question, answer, source_doc, source_page, vector
+            val v4Title   = obj.optString("title", "")
+            val v4Content = obj.optString("content", "")
+            val question  = obj.optString("question", "")
+            val answer    = obj.optString("answer", "")
+            val sourceDoc = obj.optString("source_doc", "")
+            val sourcePage = obj.optString("source_page", "").ifBlank {
+                runCatching { obj.opt("source_page")?.toString() ?: "" }.getOrDefault("")
+            }
+            val v5Id      = obj.optString("id", "")
+            val v4ChunkId = obj.optString("chunk_id", "")
+
+            val title = sourceDoc.ifBlank { v4Title }
+            val rawContent = answer.ifBlank { v4Content }
+            val content = if (question.isNotBlank() && rawContent.isNotBlank()) "P: $question\n$rawContent" else rawContent
+            val resolvedChunkId = when {
+                v5Id.isNotBlank()      -> v5Id
+                v4ChunkId.isNotBlank() -> v4ChunkId
+                else                   -> contentHash(content)
+            }
 
             if (title.isBlank() || content.isBlank()) { rejected++; continue }
             val vectorArr = obj.optJSONArray("vector")
             if (vectorArr == null || vectorArr.length() != 384) { rejected++; continue }
 
-            if (chunkId in existingKeys) { skipped++; continue }
+            if (resolvedChunkId in existingKeys) { skipped++; continue }
 
             val vector = FloatArray(384) { vectorArr.getDouble(it).toFloat() }
             chunkBox.put(DocumentChunk(
                 title = ChunkEncryptor.encrypt(title),
                 content = ChunkEncryptor.encrypt(content),
-                chunkId = chunkId,
+                chunkId = resolvedChunkId,
+                sourcePage = sourcePage.ifBlank { null },
                 vector = vector
             ))
-            existingKeys.add(chunkId)
+            existingKeys.add(resolvedChunkId)
             added++
         }
 

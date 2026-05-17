@@ -30,6 +30,9 @@ GEMINI.md
 .claude/
 .mcp.json
 
+# Archive doc
+archive/
+
 # Corpus: canonical version lives in corpus/dist/manuales_base_v6.json (tracked in git).
 # The assets copy below is identical — kept untracked to avoid double-storing 16 MB in git.
 # To restore: cp corpus/dist/manuales_base_v6.json app/src/main/assets/manuales_base.json

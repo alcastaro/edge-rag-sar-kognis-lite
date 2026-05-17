@@ -283,7 +283,8 @@ fun MapFallbackViewMulti(
         }
 
         // Location controls — bottom-right column: [Track toggle] / [Center on me]
-        if (deviceLatLon != null) {
+        // Always visible; if no GPS fix yet, the tap is a no-op (toast hint).
+        run {
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -292,7 +293,13 @@ fun MapFallbackViewMulti(
             ) {
                 // Track toggle — amber when active, animates map on every GPS update.
                 IconButton(
-                    onClick = { isTracking = !isTracking },
+                    onClick = {
+                        if (liveGps == null) {
+                            android.widget.Toast.makeText(context, "Waiting for GPS fix…", android.widget.Toast.LENGTH_SHORT).show()
+                            return@IconButton
+                        }
+                        isTracking = !isTracking
+                    },
                     modifier = Modifier
                         .background(
                             if (isTracking) io.kognis.tactical.ui.theme.RescueAmber else Color(0xFF1A1A1A),
@@ -311,7 +318,12 @@ fun MapFallbackViewMulti(
                 // Center on me — one-shot recenter on current GPS fix.
                 IconButton(
                     onClick = {
-                        liveGps?.let {
+                        val g = liveGps
+                        if (g == null) {
+                            android.widget.Toast.makeText(context, "Waiting for GPS fix…", android.widget.Toast.LENGTH_SHORT).show()
+                            return@IconButton
+                        }
+                        g.let {
                             mapView.controller.animateTo(GeoPoint(it.first, it.second))
                             mapView.controller.setZoom(16.0)
                         }
