@@ -54,6 +54,7 @@ import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.filled.VolumeOff
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.ui.zIndex
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.material.icons.filled.Settings
@@ -1989,13 +1990,15 @@ class MainActivity : ComponentActivity() {
                                             }
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Box {
-                                                    androidx.compose.material3.AssistChip(
-                                                        onClick = { expandedModelMenu = true },
-                                                        label = {
-                                                            Text("Gemma 4 E2B · Offline ✓", color = androidx.compose.ui.graphics.Color.White, fontSize = 10.sp)
-                                                        },
-                                                        colors = androidx.compose.material3.AssistChipDefaults.assistChipColors(containerColor = androidx.compose.ui.graphics.Color.DarkGray)
-                                                    )
+                                                    // Compact verbosity selector — replaces the wide "Gemma 4 · Offline" chip
+                                                    // so the Send button always fits at the right edge.
+                                                    IconButton(onClick = { expandedModelMenu = true }) {
+                                                        Icon(
+                                                            Icons.Default.Tune,
+                                                            contentDescription = "Verbosity",
+                                                            tint = io.kognis.tactical.ui.theme.RescueAmber,
+                                                        )
+                                                    }
 
                                                     androidx.compose.material3.DropdownMenu(
                                                         expanded = expandedModelMenu,

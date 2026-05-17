@@ -318,8 +318,10 @@ fun MapFallbackViewMulti(
         }
     }
 
-    // Re-apply markers whenever the list changes (or route mode toggles).
-    LaunchedEffect(markers, routeMode) {
+    // Re-apply markers whenever the list count changes (or route mode toggles).
+    // NOTE: SnapshotStateList reference stays stable across additions, so we
+    // key on size + last-timestamp instead of the list reference itself.
+    LaunchedEffect(markers.size, markers.lastOrNull()?.timestampMs, routeMode) {
         // Preserve puck across marker rebuilds (added in liveGps LaunchedEffect below).
         // Preserve MapEventsOverlay (long-press handler) — it's not a Marker.
         mapView.overlays.removeAll {
@@ -470,7 +472,20 @@ fun MapFallbackViewMulti(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             IconButton(
-                onClick = { routeMode = !routeMode },
+                onClick = {
+                    routeMode = !routeMode
+                    val needed = (deviceLatLon != null).let { hasGps ->
+                        if (hasGps) 1 else 2
+                    }
+                    if (routeMode && markers.size < needed) {
+                        android.widget.Toast.makeText(
+                            context,
+                            if (deviceLatLon == null) "Need at least 2 markers (or 1 marker + GPS) to draw a route"
+                            else "Need at least 1 marker to draw a route from your GPS",
+                            android.widget.Toast.LENGTH_LONG,
+                        ).show()
+                    }
+                },
                 modifier = Modifier.size(28.dp),
             ) {
                 Icon(

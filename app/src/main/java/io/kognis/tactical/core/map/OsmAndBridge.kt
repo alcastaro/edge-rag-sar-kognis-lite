@@ -105,6 +105,58 @@ object OsmAndBridge {
         return Uri.parse("geo:$lat,$lon?z=15&q=$lat,$lon($labelEnc)")
     }
 
+    /**
+     * Open Google Maps with a multi-marker directions URL: first marker is the
+     * origin, remaining markers are stops + final destination. Up to 10 markers
+     * (Google Maps URL waypoint limit). Uses the universal `maps.google.com/maps/dir/`
+     * URL so it works offline-after-handoff once Google Maps caches the area.
+     */
+    fun openAllInGoogleMaps(context: Context, markers: List<MarkerStore.Entry>): Boolean {
+        if (markers.isEmpty()) return false
+        val capped = markers.take(10)
+        val path = capped.joinToString("/") { "${it.location.lat},${it.location.lon}" }
+        val uri = Uri.parse("https://www.google.com/maps/dir/$path")
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            // Prefer Google Maps app; fall back to browser if not installed.
+            if (isGoogleMapsInstalled(context)) setPackage(PKG_GOOGLE_MAPS)
+        }
+        return try {
+            context.startActivity(intent)
+            Log.d(TAG, "Opened ${capped.size} markers in Google Maps directions")
+            true
+        } catch (e: Exception) {
+            Log.w(TAG, "Multi-marker Google Maps launch failed: ${e.message}")
+            false
+        }
+    }
+
+    /**
+     * Open OsmAnd with multiple favourites. OsmAnd's `geo:` URI handler only
+     * accepts a single point; for batch handoff we use OsmAnd's GPX import
+     * intent — caller must have written a GPX file via [GpxExporter] first.
+     *
+     * Returns true if intent dispatch succeeded. If OsmAnd isn't installed,
+     * returns false (UI should offer the in-app map or Google Maps instead).
+     */
+    fun openAllInOsmAnd(context: Context, gpxUri: Uri): Boolean {
+        if (!isInstalled(context)) return false
+        val pkg = if (isPackageInstalled(context, PKG_OSMAND_PLUS)) PKG_OSMAND_PLUS else PKG_OSMAND_FREE
+        val intent = Intent(Intent.ACTION_VIEW, gpxUri).apply {
+            setPackage(pkg)
+            setDataAndType(gpxUri, "application/gpx+xml")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        return try {
+            context.startActivity(intent)
+            Log.d(TAG, "Handed GPX to $pkg")
+            true
+        } catch (e: Exception) {
+            Log.w(TAG, "OsmAnd GPX import launch failed: ${e.message}")
+            false
+        }
+    }
+
     private fun isPackageInstalled(context: Context, pkg: String): Boolean = try {
         context.packageManager.getPackageInfo(pkg, 0)
         true
