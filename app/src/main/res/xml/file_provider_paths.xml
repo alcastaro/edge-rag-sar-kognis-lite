@@ -5,4 +5,5 @@
     <external-files-path name="test_results" path="test_results/" />
     <external-files-path name="gpx" path="gpx/" />
     <external-files-path name="markers" path="markers/" />
+    <external-cache-path name="vision_captures" path="vision/" />
 </paths>

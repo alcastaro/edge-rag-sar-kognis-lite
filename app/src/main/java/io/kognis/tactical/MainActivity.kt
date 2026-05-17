@@ -141,6 +141,36 @@ class MainActivity : ComponentActivity() {
         fieldCore?.updateKnowledgeBase(uri.toString())
     }
 
+    // Location permission — required at runtime for GPS puck / tracking / distance.
+    // Manifest-declared permissions are not auto-granted on API 23+; must be requested.
+    private val locationPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        val granted = results[android.Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                      results[android.Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) {
+            android.widget.Toast.makeText(this, "Location enabled — waiting for fix…", android.widget.Toast.LENGTH_SHORT).show()
+        } else {
+            android.widget.Toast.makeText(this, "Location denied — GPS features disabled", android.widget.Toast.LENGTH_LONG).show()
+        }
+    }
+
+    /** Public entry — request location permissions if not yet granted. */
+    internal fun ensureLocationPermission() {
+        val fine = androidx.core.content.ContextCompat.checkSelfPermission(
+            this, android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        val coarse = androidx.core.content.ContextCompat.checkSelfPermission(
+            this, android.Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (!fine && !coarse) {
+            locationPermissionLauncher.launch(arrayOf(
+                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION,
+            ))
+        }
+    }
+
     // Pending action when RECORD_AUDIO permission is requested mid-flow. Invoked
     // on permission result so the user only taps the mic button once.
     @Volatile private var pendingMicAction: (() -> Unit)? = null
@@ -152,6 +182,81 @@ class MainActivity : ComponentActivity() {
         pendingMicAction = null
         if (granted) action?.invoke()
         else android.widget.Toast.makeText(this, "Mic permission denied", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
+    // Vision agent: camera capture + gallery picker for medication-label OCR.
+    @Volatile private var pendingCameraCaptureUri: android.net.Uri? = null
+    @Volatile private var pendingCameraAction: (() -> Unit)? = null
+
+    private val cameraPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        val action = pendingCameraAction
+        pendingCameraAction = null
+        if (granted) action?.invoke()
+        else android.widget.Toast.makeText(this, "Camera permission denied", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
+    private val cameraCaptureLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.TakePicture()
+    ) { success ->
+        val uri = pendingCameraCaptureUri
+        pendingCameraCaptureUri = null
+        if (success && uri != null) runVisionAgent(uri)
+        else android.widget.Toast.makeText(this, "Capture cancelled", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
+    private val galleryPickerLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) runVisionAgent(uri)
+    }
+
+    /** Vision agent entry point: run OCR on the given image URI, then route through RAG. */
+    private fun runVisionAgent(uri: android.net.Uri) {
+        lifecycleScope.launch {
+            android.widget.Toast.makeText(this@MainActivity, "Vision agent: reading label…", android.widget.Toast.LENGTH_SHORT).show()
+            val ocr = runCatching {
+                io.kognis.tactical.core.agent.VisionAgent.recognizeFromUri(this@MainActivity, uri)
+            }.getOrElse {
+                android.widget.Toast.makeText(this@MainActivity, "OCR failed: ${it.message}", android.widget.Toast.LENGTH_LONG).show()
+                return@launch
+            }
+            if (ocr.isEmpty) {
+                android.widget.Toast.makeText(this@MainActivity, "No text detected on label", android.widget.Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            val query = io.kognis.tactical.core.agent.VisionAgent.buildMedicationQuery(ocr, en = false)
+            android.widget.Toast.makeText(this@MainActivity, "Extracted ${ocr.rawText.length} chars · querying RAG", android.widget.Toast.LENGTH_SHORT).show()
+            this@MainActivity.isInGeneration.value = true
+            sendText(query, "Siempre")
+        }
+    }
+
+    /** Build a temp file in external cache + content:// URI for camera capture. */
+    private fun newCameraCaptureUri(): android.net.Uri {
+        val dir = java.io.File(externalCacheDir, "vision").also { it.mkdirs() }
+        val ts = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US).format(java.util.Date())
+        val file = java.io.File(dir, "label_$ts.jpg")
+        return androidx.core.content.FileProvider.getUriForFile(this, "$packageName.provider", file)
+    }
+
+    /** Public entry — start camera capture flow. Handles permission. */
+    internal fun launchVisionCamera() {
+        val granted = androidx.core.content.ContextCompat.checkSelfPermission(
+            this, android.Manifest.permission.CAMERA
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        val action: () -> Unit = {
+            val uri = newCameraCaptureUri()
+            pendingCameraCaptureUri = uri
+            cameraCaptureLauncher.launch(uri)
+        }
+        if (granted) action() else { pendingCameraAction = action; cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA) }
+    }
+
+    /** Public entry — start gallery picker. No permission needed (system picker). */
+    internal fun launchVisionGallery() {
+        galleryPickerLauncher.launch("image/*")
     }
 
     private val markerImportLauncher = registerForActivityResult(
@@ -625,7 +730,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
+        // Request location permissions up front — GPS puck, tracking, and marker
+        // distance all silently no-op without ACCESS_FINE_LOCATION. Asking on
+        // first launch is less surprising than asking when the user taps a button.
+        ensureLocationPermission()
+
         // Start FieldAssistantService via Intent.
         // startForegroundService() avoids BackgroundServiceStartNotAllowedException
         // when launched via `adb am start` (Android 14+ classifies adb-launched
@@ -1003,8 +1113,28 @@ class MainActivity : ComponentActivity() {
             @OptIn(ExperimentalMaterial3Api::class)
             ModalBottomSheet(onDismissRequest = { showAddMenu = false }, containerColor = io.kognis.tactical.ui.theme.MachinedGraphite) {
                 Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp)) {
-                    Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable { showWaitlistDialog = true }, verticalAlignment = Alignment.CenterVertically) { Icon(painterResource(android.R.drawable.ic_menu_camera), null, tint=androidx.compose.ui.graphics.Color.Gray); Spacer(Modifier.width(16.dp)); Text(stringResource(R.string.camera) + " (v1.1)", color=androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.bodyLarge) }
-                    Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable { showWaitlistDialog = true }, verticalAlignment = Alignment.CenterVertically) { Icon(painterResource(android.R.drawable.ic_menu_gallery), null, tint=androidx.compose.ui.graphics.Color.Gray); Spacer(Modifier.width(16.dp)); Text(stringResource(R.string.gallery) + " (v1.1)", color=androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.bodyLarge) }
+                    Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable {
+                        showAddMenu = false
+                        this@MainActivity.launchVisionCamera()
+                    }, verticalAlignment = Alignment.CenterVertically) {
+                        Icon(painterResource(android.R.drawable.ic_menu_camera), null, tint = io.kognis.tactical.ui.theme.RescueAmber)
+                        Spacer(Modifier.width(16.dp))
+                        Column {
+                            Text("Identify medication (camera)", color = androidx.compose.ui.graphics.Color.White, style = MaterialTheme.typography.bodyLarge)
+                            Text("Vision agent: OCR label → RAG dosage lookup", color = androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                    Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable {
+                        showAddMenu = false
+                        this@MainActivity.launchVisionGallery()
+                    }, verticalAlignment = Alignment.CenterVertically) {
+                        Icon(painterResource(android.R.drawable.ic_menu_gallery), null, tint = io.kognis.tactical.ui.theme.RescueAmber)
+                        Spacer(Modifier.width(16.dp))
+                        Column {
+                            Text("Identify from gallery", color = androidx.compose.ui.graphics.Color.White, style = MaterialTheme.typography.bodyLarge)
+                            Text("Vision agent: pick a label image → OCR → RAG", color = androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
                     androidx.compose.material3.Divider(color = androidx.compose.ui.graphics.Color.DarkGray, modifier = Modifier.padding(vertical = 4.dp))
                     Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable {
                         showAddMenu = false
@@ -1092,8 +1222,28 @@ class MainActivity : ComponentActivity() {
                     }, verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Default.CloudUpload, null, tint=androidx.compose.ui.graphics.Color.White); Spacer(Modifier.width(16.dp)); Column { Text("Import map markers", color=androidx.compose.ui.graphics.Color.White, style = MaterialTheme.typography.bodyLarge); Text("Load locations from JSON (same format as export)", color=androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.labelSmall) } }
 
                     androidx.compose.material3.Divider(color = androidx.compose.ui.graphics.Color.DarkGray, modifier = Modifier.padding(vertical = 4.dp))
-                    Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable { showSettingsMenu = false; showWaitlistDialog = true }, verticalAlignment = Alignment.CenterVertically) { Icon(painterResource(android.R.drawable.ic_menu_camera), null, tint=androidx.compose.ui.graphics.Color.Gray); Spacer(Modifier.width(16.dp)); Text(stringResource(R.string.camera) + " (v1.1)", color=androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.bodyLarge) }
-                    Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable { showSettingsMenu = false; showWaitlistDialog = true }, verticalAlignment = Alignment.CenterVertically) { Icon(painterResource(android.R.drawable.ic_menu_gallery), null, tint=androidx.compose.ui.graphics.Color.Gray); Spacer(Modifier.width(16.dp)); Text(stringResource(R.string.gallery) + " (v1.1)", color=androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.bodyLarge) }
+                    Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable {
+                        showSettingsMenu = false
+                        this@MainActivity.launchVisionCamera()
+                    }, verticalAlignment = Alignment.CenterVertically) {
+                        Icon(painterResource(android.R.drawable.ic_menu_camera), null, tint = io.kognis.tactical.ui.theme.RescueAmber)
+                        Spacer(Modifier.width(16.dp))
+                        Column {
+                            Text("Identify medication (camera)", color = androidx.compose.ui.graphics.Color.White, style = MaterialTheme.typography.bodyLarge)
+                            Text("Vision agent: OCR label → RAG dosage", color = androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                    Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable {
+                        showSettingsMenu = false
+                        this@MainActivity.launchVisionGallery()
+                    }, verticalAlignment = Alignment.CenterVertically) {
+                        Icon(painterResource(android.R.drawable.ic_menu_gallery), null, tint = io.kognis.tactical.ui.theme.RescueAmber)
+                        Spacer(Modifier.width(16.dp))
+                        Column {
+                            Text("Identify from gallery", color = androidx.compose.ui.graphics.Color.White, style = MaterialTheme.typography.bodyLarge)
+                            Text("Vision agent: pick image → OCR → RAG", color = androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
                     Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable {
                         showSettingsMenu = false
                         kbPickLauncher.launch(arrayOf("application/json", "application/octet-stream", "*/*"))

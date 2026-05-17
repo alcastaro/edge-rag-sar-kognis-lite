@@ -141,6 +141,18 @@ The "Good" in Gemma 4 Good is the humanitarian thesis: AI deployed where it actu
 
 Total: under 12 seconds from voice to actionable triage decision plus a synchronized map state with the next team, all without a single byte of network egress.
 
+### Vision agent: medication identification
+
+**Same incident, 03:40.** Medic finds an unmarked blister pack on a survivor and needs to confirm dose before administering.
+
+1. **Capture.** Medic opens the gear menu → "Identify medication (camera)". Phone camera captures the blister pack label. File written to `externalCacheDir/vision/label_*.jpg`.
+2. **On-device OCR.** `VisionAgent.recognizeFromUri()` invokes ML Kit's bundled Latin text recognizer. ~150 ms on Snapdragon 8 Elite. Extracts label text into structured blocks. Zero network.
+3. **Route to RAG.** Extracted text is wrapped in a `buildMedicationQuery()` prompt and routed through `RagOrchestrator` with `ragMode = "Siempre"` (force RAG — the corpus is the authoritative dosage source, not the model's parametric memory).
+4. **Hybrid retrieval.** HNSW + BM25 RRF returns the relevant chunks from the INSARAG / UNDAC humanitarian-field corpus. The model grounds its answer in those chunks.
+5. **Operator answer.** Streamed three-sentence dose summary with the field-protocol citation visible in the RAG audit panel.
+
+This flow is the agentic argument concretized: a deterministic pre-LLM tool (vision OCR) → a retrieval-strategy agent (`RagOrchestrator`) → the reasoning model (Gemma 4 E2B) → an operator answer. The vision step is intentionally NOT Gemma 4's native vision modality — LiteRT-LM 0.11.0 does not yet expose the multimodal Kotlin API for Gemma 4, so we route through ML Kit as a faithful agentic-tool substitute until the native path is available. Honest framing, working pipeline.
+
 ---
 
 ## License

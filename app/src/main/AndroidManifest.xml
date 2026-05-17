@@ -13,6 +13,9 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <!-- Flashlight tool: signaling + dark-conditions SAR work -->
     <uses-permission android:name="android.permission.FLASHLIGHT"/>
+    <!-- Vision agent: medication-label OCR via on-device ML Kit Text Recognition -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
 
     <!-- Android 11+ visibility for SpeechRecognizer service -->
     <queries>

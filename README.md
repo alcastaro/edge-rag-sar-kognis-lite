@@ -72,24 +72,27 @@ Kognis Lite implements a lightweight tool-using agent loop on-device. Five compo
 | `RagOrchestrator` | Retrieval strategy agent | Selects per-query retrieval mode (`Auto` / `Always` / `Never` / `NoMap`). Runs hybrid HNSW + BM25 with Reciprocal-Rank-Fusion; falls back to full-text BM25 when semantic recall is low. Bypasses retrieval entirely when explicit coordinates are present in the query (the LLM has everything it needs). |
 | `Gemma 4 E2B` (LiteRT-LM) | Reasoning model | Generates the operator-facing answer. Emits structured tool calls as `LOCATION_JSON: {...}` sentinel tags on the last line of the response. |
 | `LocationJsonExtractor` | Tool-call parser | Parses the sentinel-token tool call into a typed `Location` (lat, lon, label, SAR type). Drops the marker into `MarkerStore`. |
+| `VisionAgent` | Pre-LLM vision tool | On-device OCR (ML Kit Latin text recognition, ~3 MB bundled model). Camera or gallery → extracted label text → routed back through `RagOrchestrator` for medication / protocol resolution. Used for the medication-identification flow. Not Gemma 4's native vision modality — that path is reserved for v1.1 when LiteRT-LM exposes the multimodal Kotlin API. |
 | `VoiceInputAgent` + `FlashlightTool` | Local-action tools | Hands-free speech-to-text input (Android on-device SpeechRecognizer); torch toggle for low-light field work. Both run with zero network. |
 
 ### Closed agentic loop
 
 ```
-operator input (text or voice)
+operator input (text · voice · camera label)
   ↓
-QueryPreprocessor   ← classifies intent, extracts coordinates, infers SAR type
+[VoiceInputAgent | VisionAgent]   ← pre-LLM modality tools (offline)
   ↓
-RagOrchestrator     ← selects retrieval mode, runs hybrid search if needed
+QueryPreprocessor                 ← classifies intent, extracts coordinates, infers SAR type
+  ↓
+RagOrchestrator                   ← selects retrieval mode, runs hybrid search if needed
   ↓
 Gemma 4 E2B (on-device, GPU/NPU)
   ↓
-LocationJsonExtractor ← parses tool call, dispatches to MarkerStore
+LocationJsonExtractor             ← parses tool call, dispatches to MarkerStore
   ↓
-Android map action  ← OsmAnd / Google Maps / osmdroid fallback
+Android map action                ← OsmAnd / Google Maps / osmdroid fallback
   ↓
-Marker state + GPS distance fed back into next prompt
+Marker state + GPS distance       ← fed back into next prompt
 ```
 
 This is a function-calling pattern implemented with structured-output parsing rather than a native tool-call API — chosen because LiteRT-LM 0.11.0 does not yet expose a `ToolProvider` interface for Gemma 4 E2B (planned for v1.1). The contract is otherwise identical: the model emits a typed action, the host parses it, dispatches to a registered tool, and feeds the result back into context.

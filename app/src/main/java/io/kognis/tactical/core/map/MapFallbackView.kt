@@ -155,7 +155,11 @@ fun MapFallbackViewMulti(
     }
 
     // Live GPS subscription — 2s / 5m updates, both providers, auto-cleanup on dispose.
-    DisposableEffect(Unit) {
+    // Re-subscribes on each lifecycle ON_RESUME so a runtime permission grant (which
+    // dispatches the permission-dialog Activity and resumes us afterward) takes effect
+    // immediately without requiring the user to reopen the map.
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
         val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val listener = object : LocationListener {
             override fun onLocationChanged(loc: Location) {
@@ -166,14 +170,38 @@ fun MapFallbackViewMulti(
             @Deprecated("Deprecated in Java")
             override fun onStatusChanged(p: String?, status: Int, extras: Bundle?) {}
         }
-        listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER).forEach { p ->
-            runCatching {
-                if (lm.isProviderEnabled(p)) {
-                    lm.requestLocationUpdates(p, 2000L, 5f, listener)
+        var subscribed = false
+        fun trySubscribe() {
+            if (subscribed) return
+            val fine = androidx.core.content.ContextCompat.checkSelfPermission(
+                context, android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            val coarse = androidx.core.content.ContextCompat.checkSelfPermission(
+                context, android.Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            if (!fine && !coarse) return  // permission not yet granted; will retry on next RESUME
+            listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER).forEach { p ->
+                runCatching {
+                    if (lm.isProviderEnabled(p)) {
+                        lm.requestLocationUpdates(p, 2000L, 5f, listener)
+                        // Seed liveGps from last-known fix if available.
+                        @SuppressLint("MissingPermission")
+                        val last = runCatching { lm.getLastKnownLocation(p) }.getOrNull()
+                        if (last != null && liveGps == null) liveGps = last.latitude to last.longitude
+                    }
                 }
             }
+            subscribed = true
         }
-        onDispose { runCatching { lm.removeUpdates(listener) } }
+        trySubscribe()
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) trySubscribe()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            runCatching { lm.removeUpdates(listener) }
+        }
     }
 
     // Puck icon (blue dot with white ring) — built once.

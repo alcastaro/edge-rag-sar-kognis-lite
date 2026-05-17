@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.onnxruntime.android)
     implementation(libs.litertlm)
     implementation(libs.osmdroid.android)
+    implementation(libs.mlkit.text.recognition)
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
     testImplementation(libs.junit)
