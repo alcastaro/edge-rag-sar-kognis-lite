@@ -182,10 +182,19 @@ class RagOrchestrator(
      */
     @Volatile var customSystemPrompt: String? = null
 
+    /**
+     * Per-turn override for [mapMode]. When non-null, the system-prompt builder
+     * uses this value INSTEAD of the field. Set to `false` when [ragMode] is
+     * "NoMap" so the mapModeAppendix is suppressed and the model doesn't emit
+     * LOCATION_JSON for vision-pipeline or training-mode queries.
+     */
+    @Volatile var mapModeOverride: Boolean? = null
+
     @VisibleForTesting
     internal fun buildSystemPrompt(radioMode: Boolean = false): String {
         customSystemPrompt?.let { return it }
-        return RagPromptBuilder.buildSystemPrompt(verbosityLevel, language, modelSize, radioMode, mapMode)
+        val effectiveMapMode = mapModeOverride ?: mapMode
+        return RagPromptBuilder.buildSystemPrompt(verbosityLevel, language, modelSize, radioMode, effectiveMapMode)
     }
 
     /**
@@ -198,6 +207,10 @@ class RagOrchestrator(
      * Returns RagResult with metadata + LLM response flow.
      */
     suspend fun evaluate(query: String, ragMode: String = "Auto", deviceLat: Double? = null, deviceLon: Double? = null, radioMode: Boolean = false): RagResult {
+        // Per-turn mapMode toggle: NoMap suppresses LOCATION_JSON appendix entirely.
+        // Vision and training queries set ragMode=NoMap so the model doesn't try to
+        // place a map marker from the response.
+        mapModeOverride = if (ragMode == "NoMap") false else null
         val mode = if (embeddingEngine.isRealModeActive()) "ONNX" else "TEXT"
         Log.d(TAG, "=== RAG evaluate [$mode mode] [ragMode: $ragMode] [radioMode: $radioMode]: '${query.take(80)}'")
 

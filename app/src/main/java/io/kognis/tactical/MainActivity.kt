@@ -349,6 +349,13 @@ class MainActivity : ComponentActivity() {
     internal val ttsBuffer = StringBuilder()
     internal var ttsAgent: io.kognis.tactical.core.agent.TtsAgent? = null
 
+    // Cheap heuristic so sendText can short-circuit field-assistant injection paths.
+    // Reads the AIDL surface; tolerates null fieldCore (returns false).
+    private fun isTrainingActive(): Boolean = runCatching {
+        val json = fieldCore?.learnerModelJson ?: return false
+        org.json.JSONObject(json).optLong("active_session_id", 0L) > 0L
+    }.getOrDefault(false)
+
     // Adaptive learning — accumulates assistant tokens to parse SKILL: tag client-side.
     // Service also parses + persists, but UI needs the parsed skill to render Quiz/Case cards.
     internal val skillBuffer = StringBuilder()
@@ -2561,7 +2568,15 @@ class MainActivity : ComponentActivity() {
     internal fun sendText(input: String, ragMode: String = "Auto", isEval: Boolean = false) {
         // Dismiss prior training cards when a new user turn starts.
         runOnUiThread { dismissTrainingCards?.invoke() }
-        var effectiveRagMode = ragMode
+        // Training-mode guards: skip field-assistant injections (markers + GPS) and force
+        // ragMode so the LOCATION_JSON appendix doesn't pollute the training prompt.
+        val trainingActive = isTrainingActive()
+        var effectiveRagMode = if (trainingActive) "Siempre" else ragMode
+        if (trainingActive) {
+            val query = input  // raw — no buildQueryWithMarkers, no QueryPreprocessor side-effects
+            fieldCore?.sendQuery(query, effectiveRagMode)
+            return
+        }
         if (!isEval) {
             val prep = io.kognis.tactical.core.map.QueryPreprocessor.preprocess(input)
             when {
