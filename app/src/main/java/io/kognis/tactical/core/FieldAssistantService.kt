@@ -436,6 +436,20 @@ class FieldAssistantService : Service() {
                 newStore
             }
 
+            // Eager-init the learning orchestrator so its `init` block runs and
+            // restores any unclosed session BEFORE the user touches gear → Start.
+            // If they had a session in progress when the app died, it's back now.
+            if (learningOrchestrator == null) {
+                learningOrchestrator = io.kognis.tactical.core.learning.LearningOrchestrator(
+                    this@FieldAssistantService, store,
+                )
+                learningOrchestrator?.let {
+                    if (it.isActive) {
+                        Log.i(TAG, "Restored training session ${it.activeSessionId} on service init")
+                    }
+                }
+            }
+
             safeCallback { it.onStatusChange(s("Cargando base de conocimiento...", "Loading knowledge base...")) }
             io.kognis.tactical.data.KnowledgeBaseLoader.ingestIfNeeded(
                 this@FieldAssistantService,

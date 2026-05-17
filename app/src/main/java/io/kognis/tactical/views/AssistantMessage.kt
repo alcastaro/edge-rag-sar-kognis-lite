@@ -225,6 +225,24 @@ fun AssistantMessage(
                     }
                 }
 
+                // Per-message TTS playback — taps the assistant text into the TTS agent.
+                if (text.isNotBlank()) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "🔊",
+                        fontSize = 14.sp,
+                        color = Color.Gray.copy(alpha = 0.6f),
+                        modifier = Modifier
+                            .clickable {
+                                runCatching {
+                                    val act = context as? io.kognis.tactical.MainActivity
+                                    act?.ttsAgent?.speak(displayText)
+                                }
+                            }
+                            .padding(4.dp)
+                    )
+                }
+
                 if (onFeedback != null) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(

@@ -42,6 +42,23 @@ class LearningOrchestrator(
 
     val isActive: Boolean get() = activeSessionId > 0L
 
+    init {
+        // Resume the last unclosed session — `closeTs == 0L` means the previous
+        // process died before endSession() was called (app kill mid-training).
+        // Mastery + facts + summaries are already persisted; we just need to re-
+        // bind the in-memory pointer so the next sendQuery routes through this
+        // orchestrator with a valid sessionId.
+        runCatching {
+            val last = store.lastSession()
+            if (last != null && !last.isClosed) {
+                activeSessionId = last.id
+                activeCurriculumId = last.curriculumId
+                activeLanguage = last.language
+                Log.i(TAG, "Resumed training session ${last.id} (curriculum=${last.curriculumId}, turns=${last.turnCount})")
+            }
+        }
+    }
+
     // ── Lifecycle ─────────────────────────────────────────────────────────
 
     /** Start a session. If `curriculumUri` is null, loads the bundled asset. */
