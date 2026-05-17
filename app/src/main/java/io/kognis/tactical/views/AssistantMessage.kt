@@ -168,6 +168,21 @@ fun AssistantMessage(
             }
             MarkdownText(text = displayText, modifier = Modifier.testTag("AssistantMessageViewText"), color = io.kognis.tactical.ui.theme.SilicaWhite)
 
+            // Inline citation footer — visible at-a-glance source attribution so the
+            // judge doesn't need to tap to verify the answer is grounded.
+            if (ragData?.activated == true && ragData.allChunks.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                val top = ragData.allChunks.first()
+                val pageStr = top.sourcePage?.let { " · p.$it" } ?: ""
+                Text(
+                    text = "📖 Source: ${top.title.take(60)}$pageStr",
+                    color = Color(0xFF9CA3AF),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontSize = 10.sp,
+                    modifier = Modifier.clickable { showRagSheet = true },
+                )
+            }
+
             // "Ver en mapa" button — appears when the LLM emitted a LOCATION_JSON tag.
             // Opens a bottom sheet letting the user pick osmdroid / OsmAnd / Google Maps.
             if (mapLocation != null) {

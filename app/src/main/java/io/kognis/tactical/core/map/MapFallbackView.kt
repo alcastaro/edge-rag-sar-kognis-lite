@@ -524,6 +524,33 @@ fun MapFallbackViewMulti(
             }
         }
 
+        // Empty state — only when no markers AND we're not waiting for a tap-to-mark.
+        if (markers.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp)
+                    .background(Color(0xCC1A1A1A), androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = "No markers yet",
+                    color = io.kognis.tactical.ui.theme.RescueAmber,
+                    fontSize = 12.sp,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "Long-press anywhere to drop a marker, or ask the assistant: \"add a victim at 18.44, -69.94\"",
+                    color = Color.LightGray,
+                    fontSize = 11.sp,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    lineHeight = 14.sp,
+                )
+            }
+        }
+
         // Top-left: compact count + clear row
         if (markers.isNotEmpty()) {
             Row(

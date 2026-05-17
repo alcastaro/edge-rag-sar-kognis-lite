@@ -21,13 +21,17 @@ fun ChatHistory(
     onFeedback: ((index: Int, rating: String) -> Unit)? = null,
 ) {
     val scrollState = rememberLazyListState()
-    // Only scroll to bottom when a new message is ADDED (count increases),
-    // not on every token update during streaming — so the user can scroll
-    // up freely while the assistant is typing.
     val messageCount = history.size
-    LaunchedEffect(messageCount) {
-        if (messageCount > 0) {
-            scrollState.animateScrollToItem(messageCount)
+    // Track streaming length of the last message so the scroll can keep up as
+    // tokens arrive — but only when the user is already near the bottom. If
+    // they scrolled up to re-read something, leave them there.
+    val lastMessageText = history.lastOrNull()?.text ?: ""
+    LaunchedEffect(messageCount, lastMessageText) {
+        if (messageCount == 0) return@LaunchedEffect
+        val lastVisible = scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+        val userIsNearBottom = lastVisible >= messageCount - 2
+        if (userIsNearBottom) {
+            scrollState.scrollToItem(messageCount - 1)
         }
     }
     LazyColumn(modifier = modifier, state = scrollState) {
