@@ -585,10 +585,10 @@ class RagOrchestrator(
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
     }
 
-    /** Human-readable distance label: "15 m", "1.2 km" etc. */
+    /** Human-readable distance label: "15 m", "1.2 km" etc. Locale.US — see GeoUtils. */
     private fun formatDist(meters: Double): String = when {
         meters < 1000 -> "${meters.toInt()} m"
-        else -> "${"%.1f".format(meters / 1000)} km"
+        else -> String.format(java.util.Locale.US, "%.1f km", meters / 1000)
     }
 
     // ─────────────────────────────────────────────────────────────────────────

@@ -365,7 +365,7 @@ fun MapFallbackViewMulti(
                     } ?: ""
                     snippet = buildString {
                         append("[${entry.cotType.symbol}] ${entry.cotType.label}")
-                        append(" · ${"%.5f".format(entry.location.lat)}, ${"%.5f".format(entry.location.lon)}")
+                        append(" · ${String.format(java.util.Locale.US, "%.5f", entry.location.lat)}, ${String.format(java.util.Locale.US, "%.5f", entry.location.lon)}")
                         if (distStr.isNotEmpty()) append(" · $distStr")
                     }
                     icon = cotIcons[entry.cotType]
@@ -430,7 +430,7 @@ fun MapFallbackViewMulti(
                 position = GeoPoint(gps.first, gps.second)
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 title = PUCK_TITLE
-                snippet = "${"%.5f".format(gps.first)}, ${"%.5f".format(gps.second)}"
+                snippet = "${String.format(java.util.Locale.US, "%.5f", gps.first)}, ${String.format(java.util.Locale.US, "%.5f", gps.second)}"
                 icon = puckIcon
             },
         )
@@ -668,7 +668,7 @@ fun MapFallbackViewMulti(
                     text = {
                         Column {
                             Text("[${entry.cotType.symbol}] ${entry.cotType.label}", color = Color(entry.cotType.colorArgb), fontSize = 13.sp)
-                            Text("${"%.5f".format(entry.location.lat)}, ${"%.5f".format(entry.location.lon)}", color = Color.LightGray, fontSize = 11.sp)
+                            Text("${String.format(java.util.Locale.US, "%.5f", entry.location.lat)}, ${String.format(java.util.Locale.US, "%.5f", entry.location.lon)}", color = Color.LightGray, fontSize = 11.sp)
                             deviceLatLon?.let {
                                 val d = GeoUtils.distanceLabel(it.first, it.second, entry.location.lat, entry.location.lon)
                                 Text("Distance from you: $d", color = io.kognis.tactical.ui.theme.RescueAmber, fontSize = 11.sp)
@@ -705,7 +705,7 @@ fun MapFallbackViewMulti(
                 text = {
                     Column {
                         Text(
-                            "${"%.5f".format(tapLat)}, ${"%.5f".format(tapLon)}",
+                            "${String.format(java.util.Locale.US, "%.5f", tapLat)}, ${String.format(java.util.Locale.US, "%.5f", tapLon)}",
                             color = Color(0xFFFFC107),
                             style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier.padding(bottom = 8.dp),

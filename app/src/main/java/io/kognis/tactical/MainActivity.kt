@@ -2713,10 +2713,12 @@ class MainActivity : ComponentActivity() {
             appendUserMessage(input)
             val en = (io.kognis.tactical.core.SecurePrefs.get(this).getString("app_language", "es") ?: "es") == "en"
             val loc = markerPlaced.location
+            val latStr = String.format(java.util.Locale.US, "%.5f", loc.lat)
+            val lonStr = String.format(java.util.Locale.US, "%.5f", loc.lon)
             val confirm = if (en)
-                "Done. Marker placed: ${loc.label} (${markerPlaced.cotType.symbol}) at ${"%.5f".format(loc.lat)}, ${"%.5f".format(loc.lon)}."
+                "Done. Marker placed: ${loc.label} (${markerPlaced.cotType.symbol}) at $latStr, $lonStr."
             else
-                "Listo. Marcador colocado: ${loc.label} (${markerPlaced.cotType.symbol}) en ${"%.5f".format(loc.lat)}, ${"%.5f".format(loc.lon)}."
+                "Listo. Marcador colocado: ${loc.label} (${markerPlaced.cotType.symbol}) en $latStr, $lonStr."
             appendSyntheticAssistantMessage(confirm)
             return
         }
@@ -2743,14 +2745,18 @@ class MainActivity : ComponentActivity() {
         if (markers.isEmpty() && gps == null) return query
         val capped = markers.take(10)
         val sb = StringBuilder()
+        // Locale.US on every number entering the prompt — Spanish locale produces
+        // comma decimals ("18,45036") and the model mis-parses them, corrupting distance
+        // output (e.g. 845 m → 8445 m in the 2026-05-17 report).
+        val us = java.util.Locale.US
         if (gps != null) {
-            sb.append("[DEVICE GPS: lat=${"%.5f".format(gps.first)} lon=${"%.5f".format(gps.second)}]\n")
+            sb.append("[DEVICE GPS: lat=${String.format(us, "%.5f", gps.first)} lon=${String.format(us, "%.5f", gps.second)}]\n")
         }
         if (capped.isNotEmpty()) {
             sb.append("[SESSION MARKERS — ${markers.size}]\n")
             capped.forEachIndexed { idx, entry ->
-                val lat = "%.5f".format(entry.location.lat)
-                val lon = "%.5f".format(entry.location.lon)
+                val lat = String.format(us, "%.5f", entry.location.lat)
+                val lon = String.format(us, "%.5f", entry.location.lon)
                 val distFromGps = if (gps != null) {
                     " (~${io.kognis.tactical.core.map.GeoUtils.distanceLabel(gps.first, gps.second, entry.location.lat, entry.location.lon)} from device)"
                 } else ""

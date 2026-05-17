@@ -1,5 +1,6 @@
 package io.kognis.tactical.core.map
 
+import java.util.Locale
 import kotlin.math.*
 
 object GeoUtils {
@@ -13,10 +14,13 @@ object GeoUtils {
         return R * 2 * asin(sqrt(a))
     }
 
+    // Locale.US on every number that may reach the LLM prompt — Spanish locale produces
+    // comma decimals ("0,845") which the model parses as 0845 = 845 m → corrupts to 8445 m
+    // when it re-renders distance. Reproduced 2026-05-17: actual 845 m → output 8445 m.
     fun formatDistance(km: Double): String = when {
-        km < 1.0 -> "${"%.0f".format(km * 1000)} m"
-        km < 10.0 -> "${"%.1f".format(km)} km"
-        else -> "${"%.0f".format(km)} km"
+        km < 1.0  -> String.format(Locale.US, "%.0f m", km * 1000)
+        km < 10.0 -> String.format(Locale.US, "%.1f km", km)
+        else      -> String.format(Locale.US, "%.0f km", km)
     }
 
     fun bearing(lat1: Double, lon1: Double, lat2: Double, lon2: Double): String {
