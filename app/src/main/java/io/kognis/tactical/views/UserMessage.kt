@@ -37,7 +37,9 @@ import androidx.compose.ui.unit.sp
 fun UserMessage(text: String) {
     val clipboardManager = LocalClipboardManager.current
     Box(
-        modifier = Modifier.fillMaxWidth().padding(start = 64.dp, end = 16.dp, top = 4.dp, bottom = 2.dp),
+        // 32dp leading padding (was 64) so long voice transcripts don't cram into the
+        // right 20% of the screen. Bubble still right-aligns + still has clear gutter.
+        modifier = Modifier.fillMaxWidth().padding(start = 32.dp, end = 16.dp, top = 4.dp, bottom = 2.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
         Column(horizontalAlignment = Alignment.End) {

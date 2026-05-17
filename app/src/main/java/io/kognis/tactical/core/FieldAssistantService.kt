@@ -93,11 +93,16 @@ class FieldAssistantService : Service() {
 
                     // Training mode: if a learning session is active, override the system
                     // prompt with the Hermes-style 4-section build and persist this turn.
+                    // Snapshot orchestrator + active flag together — a parallel
+                    // endLearningSession() can null the field or flip isActive between
+                    // the check below and the prompt build. Without this guard, a
+                    // Stop → New Chat → Start Training rapid sequence can land us in
+                    // training mode with a null system prompt → collapses to RAG.
                     val learning = learningOrchestrator
                     val trainingActive = learning != null && learning.isActive
                     var effectiveQuery = query
                     var effectiveMode = mode
-                    if (trainingActive) {
+                    if (trainingActive && learning != null && learning.isActive) {
                         // Detect language from the user's message itself so the model
                         // always replies in the language of the query, regardless of the
                         // app-wide setting. Spanish markers (accents + common stopwords)

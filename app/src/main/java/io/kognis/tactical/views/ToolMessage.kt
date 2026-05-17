@@ -37,7 +37,11 @@ fun ToolMessage(
         Column(horizontalAlignment = Alignment.Start) {
             Text(text = "Tool", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.titleSmall)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = text, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = text,
+                color = io.kognis.tactical.ui.theme.SilicaWhite,
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
     }
 }

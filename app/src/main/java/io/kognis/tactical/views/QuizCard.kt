@@ -101,8 +101,8 @@ fun QuizCard(
                     val isCorrect = selected != null && idx == correctIndex
                     val isWrong = isSel && idx != correctIndex
                     val rowBg = when {
-                        isCorrect -> Color(0xFF1F3A1F)
-                        isWrong -> Color(0xFF3A1F1F)
+                        isCorrect -> Color(0xFF1F4A20)   // brighter green so judges see correct on camera
+                        isWrong -> Color(0xFF5A2424)     // brighter red — old 0xFF3A1F1F was nearly invisible at 1080p
                         else -> Color(0xFF1F2128)
                     }
                     val borderColor = when {

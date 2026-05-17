@@ -176,9 +176,9 @@ fun AssistantMessage(
                 val pageStr = top.sourcePage?.let { " · p.$it" } ?: ""
                 Text(
                     text = "📖 Source: ${top.title.take(60)}$pageStr",
-                    color = Color(0xFF9CA3AF),
+                    color = Color(0xFFB0B6BE),
                     style = MaterialTheme.typography.labelSmall,
-                    fontSize = 10.sp,
+                    fontSize = 12.sp,
                     modifier = Modifier.clickable { showRagSheet = true },
                 )
             }
@@ -245,8 +245,8 @@ fun AssistantMessage(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "🔊",
-                        fontSize = 14.sp,
-                        color = Color.Gray.copy(alpha = 0.6f),
+                        fontSize = 16.sp,
+                        color = Color.LightGray.copy(alpha = 0.9f),
                         modifier = Modifier
                             .clickable {
                                 runCatching {

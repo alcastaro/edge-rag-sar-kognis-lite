@@ -2429,7 +2429,9 @@ class MainActivity : ComponentActivity() {
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = if (trainingActive) "Powered by Gemma 4 E2B · Training" else "Powered by Gemma 4 E2B",
+                        text = if (trainingActive) {
+                            if (currentLanguage == "en") "Powered by Gemma 4 E2B · Training" else "Powered by Gemma 4 E2B · Entrenamiento"
+                        } else "Powered by Gemma 4 E2B",
                         color = io.kognis.tactical.ui.theme.RescueAmber,
                         style = MaterialTheme.typography.labelSmall
                     )
@@ -2720,6 +2722,9 @@ class MainActivity : ComponentActivity() {
             else
                 "Listo. Marcador colocado: ${loc.label} (${markerPlaced.cotType.symbol}) en $latStr, $lonStr."
             appendSyntheticAssistantMessage(confirm)
+            // No LLM call happens on this path — clear the in-generation flag so the
+            // Stop (X) button doesn't stay armed for the next turn.
+            isInGeneration.value = false
             return
         }
         appendUserMessage(input)
