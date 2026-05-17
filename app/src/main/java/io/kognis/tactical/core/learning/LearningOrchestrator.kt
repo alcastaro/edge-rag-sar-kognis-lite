@@ -82,7 +82,7 @@ class LearningOrchestrator(
     fun systemPromptForActiveSession(): String? {
         val sid = activeSessionId
         if (sid == 0L) return null
-        return LearningPromptBuilder.build(store, sid, activeLanguage)
+        return LearningPromptBuilder.build(store, sid, activeLanguage, activeCurriculumId)
     }
 
     fun appendUserTurn(text: String) {

@@ -20,12 +20,14 @@ import org.json.JSONObject
  */
 object LearningPromptBuilder {
 
-    fun build(store: LearningStore, sessionId: Long, language: String): String {
+    fun build(store: LearningStore, sessionId: Long, language: String, curriculumId: String = ""): String {
         val en = language == "en"
         return buildString {
             appendIdentity(store, en)
             append("\n\n")
             appendLearnerModel(store, en)
+            append("\n\n")
+            appendCurriculumContext(store, sessionId, curriculumId, en)
             append("\n\n")
             appendSessionContext(store, sessionId, en)
             append("\n\n")
@@ -40,15 +42,73 @@ object LearningPromptBuilder {
         append(if (en) "## IDENTITY\n" else "## IDENTIDAD\n")
         if (en) {
             append("You are Kognis Training, an adaptive learning agent for Search-and-Rescue (SAR) operations. ")
-            append("You teach INSARAG, UNDAC, and Sphere protocols using a curriculum grounded in real field standards. ")
-            append("Your tone is $tone. Respond in English. Stay concise (3–5 sentences per turn unless asked to expand). ")
-            append("You always finish with either (a) a skill invocation as `SKILL: {...}` on the last line, or (b) a clear next-step question to the learner.")
+            append("You teach INSARAG, UNDAC, and Sphere protocols using the CURRICULUM CONTEXT section below.\n\n")
+            append("RULES (strict):\n")
+            append("1. DELIVER content directly. NEVER ask the learner if they want an example/quiz — they do. Just deliver it.\n")
+            append("2. When you give an example, WRITE THE FULL EXAMPLE TEXT inline in your reply BEFORE the SKILL tag. ")
+            append("Do NOT only emit `SKILL: show_example` — the learner needs to read the example in your message.\n")
+            append("3. When you emit `SKILL: quiz_user`, INCLUDE the complete question and four options in the JSON. The card UI renders only what the JSON contains.\n")
+            append("4. NEVER repeat an example or quiz you already delivered in the previous 3 turns (check SESSION CONTEXT below).\n")
+            append("5. Tone: $tone. Respond in English. 3–6 sentences per turn unless explicitly asked to expand.\n")
+            append("6. Always close with `SKILL: {...}` on the very last line — pick ONE skill.")
         } else {
             append("Eres Kognis Training, un agente de aprendizaje adaptativo para Búsqueda y Rescate (SAR). ")
-            append("Enseñas protocolos INSARAG, UNDAC y Sphere usando un currículo basado en estándares reales de campo. ")
-            append("Tu tono es $tone. Responde en español. Sé conciso (3–5 oraciones por turno salvo que se te pida expandir). ")
-            append("Siempre terminas con (a) una invocación de habilidad como `SKILL: {...}` en la última línea, o (b) una pregunta clara de siguiente paso al estudiante.")
+            append("Enseñas protocolos INSARAG, UNDAC y Sphere usando la sección CURRICULUM CONTEXT más abajo.\n\n")
+            append("REGLAS (estrictas):\n")
+            append("1. ENTREGA contenido directo. NUNCA preguntes al estudiante si quiere un ejemplo o quiz — ya lo quiere. Entrégalo.\n")
+            append("2. Cuando des un ejemplo, ESCRIBE EL TEXTO COMPLETO DEL EJEMPLO dentro de tu respuesta ANTES del tag SKILL. ")
+            append("NO emitas solo `SKILL: show_example` — el estudiante necesita leer el ejemplo en tu mensaje.\n")
+            append("3. Cuando emitas `SKILL: quiz_user`, INCLUYE la pregunta completa y las cuatro opciones en el JSON. La tarjeta UI muestra solo lo que el JSON contiene.\n")
+            append("4. NUNCA repitas un ejemplo o quiz que ya entregaste en los últimos 3 turnos (revisa SESSION CONTEXT abajo).\n")
+            append("5. Tono: $tone. Responde en español. 3–6 oraciones por turno salvo que pidan expandir.\n")
+            append("6. Siempre cierra con `SKILL: {...}` en la última línea — elige UNA habilidad.")
         }
+    }
+
+    // ── 2.5 Curriculum context ──────────────────────────────────────────
+    // Injects the active topic's case studies + quiz seeds so the model has
+    // concrete material to teach from. Without this section the model
+    // hallucinates offers ("would you like an example?") it can't deliver.
+
+    private fun StringBuilder.appendCurriculumContext(
+        store: LearningStore,
+        sessionId: Long,
+        curriculumId: String,
+        en: Boolean,
+    ) {
+        append(if (en) "## CURRICULUM CONTEXT\n" else "## CONTEXTO DEL CURRÍCULO\n")
+        if (curriculumId.isBlank()) {
+            append(if (en) "(no curriculum bound yet)" else "(currículo no vinculado aún)")
+            return
+        }
+        val lastTopicPref = store.getPref(LearningPreferenceKeys.LAST_TOPIC, "")
+        // Try to surface the most-relevant module: last topic touched, else first low-mastery, else first module.
+        val mods = store.modulesForCurriculum(curriculumId)
+        if (mods.isEmpty()) {
+            append(if (en) "(no modules loaded)" else "(sin módulos cargados)")
+            return
+        }
+        val lows = store.lowMastery(3).map { it.topic }.toSet()
+        val active = mods.firstOrNull { it.topic.equals(lastTopicPref, ignoreCase = true) }
+            ?: mods.firstOrNull { it.topic in lows }
+            ?: mods.first()
+        append(if (en) "**Active module:** ${active.topic} (${active.difficulty})\n"
+               else    "**Módulo activo:** ${active.topic} (${active.difficulty})\n")
+        if (active.summary.isNotBlank()) {
+            append(active.summary)
+            append("\n\n")
+        }
+        // Embed up to 2 case studies + 2 quiz seeds as raw JSON so the model
+        // can quote them verbatim.
+        append(if (en) "**Case studies (use these — paraphrase, don't invent):**\n" else "**Casos de estudio (usa estos — parafrasea, no inventes):**\n")
+        append("```json\n")
+        append(active.caseStudiesJson)
+        append("\n```\n")
+        append(if (en) "**Quiz seeds (when emitting SKILL: quiz_user, prefer one of these):**\n"
+               else    "**Semillas de quiz (cuando emitas SKILL: quiz_user, prefiere una de estas):**\n")
+        append("```json\n")
+        append(active.quizSeedsJson)
+        append("\n```")
     }
 
     // ── 2. Learner model ─────────────────────────────────────────────────
