@@ -92,6 +92,110 @@ fun MapFallbackView(
     MapFallbackViewMulti(markers = listOf(single), modifier = modifier)
 }
 
+/**
+ * Diagnose why GPS isn't working and try to fix it in one tap.
+ *
+ * Decision tree:
+ *   1. Permission denied → toast asking user to grant in app settings + open settings.
+ *   2. Both providers disabled → toast asking to enable + open location settings.
+ *   3. Permission + provider OK → fire a one-shot update request, seed from lastKnown.
+ */
+@SuppressLint("MissingPermission")
+private fun diagnoseGpsAndRequestFix(
+    context: Context,
+    onFix: (Double, Double) -> Unit,
+) {
+    val fine = androidx.core.content.ContextCompat.checkSelfPermission(
+        context, android.Manifest.permission.ACCESS_FINE_LOCATION,
+    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    val coarse = androidx.core.content.ContextCompat.checkSelfPermission(
+        context, android.Manifest.permission.ACCESS_COARSE_LOCATION,
+    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    if (!fine && !coarse) {
+        android.widget.Toast.makeText(
+            context,
+            "Location permission denied — enable in app settings",
+            android.widget.Toast.LENGTH_LONG,
+        ).show()
+        runCatching {
+            val intent = android.content.Intent(
+                android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                android.net.Uri.fromParts("package", context.packageName, null),
+            ).apply { addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK) }
+            context.startActivity(intent)
+        }
+        return
+    }
+
+    val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    val gpsOn = runCatching { lm.isProviderEnabled(LocationManager.GPS_PROVIDER) }.getOrDefault(false)
+    val netOn = runCatching { lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER) }.getOrDefault(false)
+    if (!gpsOn && !netOn) {
+        android.widget.Toast.makeText(
+            context,
+            "Location is OFF — enable GPS in system settings",
+            android.widget.Toast.LENGTH_LONG,
+        ).show()
+        runCatching {
+            val intent = android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                .apply { addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK) }
+            context.startActivity(intent)
+        }
+        return
+    }
+
+    // First: try last-known from BOTH providers; pick freshest.
+    val last = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
+        .filter { runCatching { lm.isProviderEnabled(it) }.getOrDefault(false) }
+        .mapNotNull { runCatching { lm.getLastKnownLocation(it) }.getOrNull() }
+        .maxByOrNull { it.time }
+    if (last != null) {
+        android.widget.Toast.makeText(
+            context,
+            "GPS fix from cache (${(System.currentTimeMillis() - last.time) / 1000}s ago)",
+            android.widget.Toast.LENGTH_SHORT,
+        ).show()
+        onFix(last.latitude, last.longitude)
+        return
+    }
+
+    // No cached fix — request a fresh single update with timeout.
+    android.widget.Toast.makeText(
+        context,
+        "Requesting fresh GPS fix… (best outdoors)",
+        android.widget.Toast.LENGTH_SHORT,
+    ).show()
+    val provider = if (gpsOn) LocationManager.GPS_PROVIDER else LocationManager.NETWORK_PROVIDER
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+        // API 30+: getCurrentLocation is the modern one-shot.
+        val cancellation = android.os.CancellationSignal()
+        lm.getCurrentLocation(
+            provider,
+            cancellation,
+            context.mainExecutor,
+        ) { loc ->
+            if (loc != null) onFix(loc.latitude, loc.longitude)
+            else android.widget.Toast.makeText(context, "No fix yet — try near a window", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    } else {
+        // Pre-API-30 fallback: subscribe with single listener, remove after first callback.
+        lm.requestLocationUpdates(
+            provider, 0L, 0f,
+            object : LocationListener {
+                override fun onLocationChanged(loc: Location) {
+                    onFix(loc.latitude, loc.longitude)
+                    runCatching { lm.removeUpdates(this) }
+                }
+                override fun onProviderEnabled(p: String) {}
+                override fun onProviderDisabled(p: String) {}
+                @Deprecated("Deprecated in Java")
+                override fun onStatusChanged(p: String?, status: Int, extras: Bundle?) {}
+            },
+            android.os.Looper.getMainLooper(),
+        )
+    }
+}
+
 @SuppressLint("MissingPermission")
 private fun lastKnownLatLon(context: Context): Pair<Double, Double>? {
     val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -431,7 +535,9 @@ fun MapFallbackViewMulti(
                 IconButton(
                     onClick = {
                         if (liveGps == null) {
-                            android.widget.Toast.makeText(context, "Waiting for GPS fix…", android.widget.Toast.LENGTH_SHORT).show()
+                            diagnoseGpsAndRequestFix(context) { lat, lon ->
+                                liveGps = lat to lon
+                            }
                             return@IconButton
                         }
                         isTracking = !isTracking
@@ -456,7 +562,11 @@ fun MapFallbackViewMulti(
                     onClick = {
                         val g = liveGps
                         if (g == null) {
-                            android.widget.Toast.makeText(context, "Waiting for GPS fix…", android.widget.Toast.LENGTH_SHORT).show()
+                            diagnoseGpsAndRequestFix(context) { lat, lon ->
+                                liveGps = lat to lon
+                                mapView.controller.animateTo(GeoPoint(lat, lon))
+                                mapView.controller.setZoom(16.0)
+                            }
                             return@IconButton
                         }
                         g.let {

@@ -52,7 +52,10 @@ import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.FlashOff
+import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.ui.zIndex
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -338,10 +341,16 @@ class MainActivity : ComponentActivity() {
     // Holds RAG metadata between onRagMetadata() and the first token
     private var pendingRagInfo: String? = null
 
+    // TTS agent — output side of the hands-free agentic loop.
+    @Volatile internal var ttsEnabled: Boolean = false
+    internal val ttsBuffer = StringBuilder()
+    internal var ttsAgent: io.kognis.tactical.core.agent.TtsAgent? = null
+
     private val fieldCallback = object : IFieldCallback.Stub() {
         override fun onTokenRetrieved(token: String) {
             android.util.Log.d("MainActivity", "onTokenRetrieved: ${token.length} chars")
             if (evalDeferred != null) evalBuffer.append(token)
+            if (ttsEnabled) ttsBuffer.append(token)
             runOnUiThread {
                 appendToLastAssistantMessage(token)
             }
@@ -352,6 +361,14 @@ class MainActivity : ComponentActivity() {
             evalDeferred?.let { def ->
                 def.complete(evalBuffer.toString())
                 evalBuffer.clear()
+            }
+            // Speak final response if TTS is on
+            if (ttsEnabled && ttsBuffer.isNotEmpty()) {
+                val text = ttsBuffer.toString()
+                ttsBuffer.clear()
+                runOnUiThread { ttsAgent?.speak(text) }
+            } else {
+                ttsBuffer.clear()
             }
             runOnUiThread {
                 isInGeneration.value = false
@@ -861,6 +878,15 @@ class MainActivity : ComponentActivity() {
         val voiceAgent = remember { io.kognis.tactical.core.agent.VoiceInputAgent(this@MainActivity) }
         // Flashlight tool state
         var flashlightOn by remember { mutableStateOf(io.kognis.tactical.core.agent.FlashlightTool.isOn) }
+        // TTS output agent — closes hands-free loop (voice in → voice out).
+        val ttsAgentLocal = remember {
+            io.kognis.tactical.core.agent.TtsAgent(this@MainActivity).also {
+                this@MainActivity.ttsAgent = it
+                it.init()
+            }
+        }
+        DisposableEffect(ttsAgentLocal) { onDispose { ttsAgentLocal.shutdown() } }
+        var ttsOn by remember { mutableStateOf(false) }
         var showObservabilityModal by remember { mutableStateOf(false) }
         var showPerfDashboard by remember { mutableStateOf(false) }
         
@@ -2005,6 +2031,20 @@ class MainActivity : ComponentActivity() {
                                                     }
                                                 }
                                                 
+                                                // TTS output agent — speaks LLM responses when on (hands-free output)
+                                                IconButton(onClick = {
+                                                    ttsOn = !ttsOn
+                                                    this@MainActivity.ttsEnabled = ttsOn
+                                                    ttsAgentLocal.setLanguage(en = (currentLanguage == "en"))
+                                                    if (!ttsOn) ttsAgentLocal.stop()
+                                                }) {
+                                                    Icon(
+                                                        if (ttsOn) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
+                                                        contentDescription = if (ttsOn) "Stop speaking" else "Speak responses",
+                                                        tint = if (ttsOn) io.kognis.tactical.ui.theme.RescueAmber else androidx.compose.ui.graphics.Color.LightGray,
+                                                    )
+                                                }
+
                                                 // Voice input agent — on-device speech-to-text → existing pipeline
                                                 if (voiceAgent.isAvailable()) {
                                                     IconButton(onClick = {
