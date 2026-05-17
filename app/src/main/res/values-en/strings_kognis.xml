@@ -98,6 +98,10 @@
     <string name="chip_lz">Mark Landing Point</string>
     <string name="chip_exfil">Evacuation Route</string>
     <string name="chip_rally">Rally Point</string>
+    <string name="chip_hazard_zone">Mark Hazard Zone</string>
+    <string name="chip_extraction_path">Extraction Route</string>
+    <string name="chip_water_point">Mark Water Point</string>
+    <string name="chip_base_camp">Mark Base Camp</string>
 
     <!-- KB Section -->
     <string name="kb_section_title">KNOWLEDGE BASE</string>

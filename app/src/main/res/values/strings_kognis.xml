@@ -98,6 +98,10 @@
     <string name="chip_lz">Marcar Punto de Aterrizaje</string>
     <string name="chip_exfil">Ruta de Evacuación</string>
     <string name="chip_rally">Punto de Reunión</string>
+    <string name="chip_hazard_zone">Marcar Zona de Peligro</string>
+    <string name="chip_extraction_path">Ruta de Extracción</string>
+    <string name="chip_water_point">Marcar Punto de Agua</string>
+    <string name="chip_base_camp">Marcar Campamento Base</string>
 
     <!-- KB Section -->
     <string name="kb_section_title">BASE DE CONOCIMIENTO</string>

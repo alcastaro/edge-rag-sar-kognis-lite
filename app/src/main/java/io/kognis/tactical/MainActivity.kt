@@ -1897,14 +1897,14 @@ class MainActivity : ComponentActivity() {
                                     val chipsIds = remember(chatMessageHistory) {
                                         val lastContent = chatMessageHistory.lastOrNull()?.text?.lowercase() ?: ""
                                         when {
-                                            listOf("herid", "sangr", "medic", "casualty", "dolor", "torniquete").any { lastContent.contains(it) } -> 
+                                            listOf("herid", "sangr", "medic", "victim", "víctim", "dolor", "torniquete", "fractur").any { lastContent.contains(it) } ->
                                                 listOf(R.string.chip_medevac, R.string.chip_march, R.string.chip_bleeding)
-                                            listOf("enemig", "contacto", "hostil", "disparo", "amenaza").any { lastContent.contains(it) } ->
-                                                listOf(R.string.chip_salute, R.string.chip_support, R.string.chip_break_contact)
-                                            listOf("zona", "mapa", "ubicación", "coordenada", "ruta", "exfil").any { lastContent.contains(it) } ->
-                                                listOf(R.string.chip_lz, R.string.chip_exfil, R.string.chip_rally)
-                                            else -> 
-                                                listOf(R.string.quick_tourniquet, R.string.quick_radio, R.string.quick_medevac)
+                                            listOf("colapso", "derrumbe", "hazard", "peligro", "químic", "incendi", "inundac", "estructur").any { lastContent.contains(it) } ->
+                                                listOf(R.string.chip_hazard_zone, R.string.chip_extraction_path, R.string.chip_water_point)
+                                            listOf("zona", "mapa", "ubicación", "coordenada", "ruta", "lz", "helicópter").any { lastContent.contains(it) } ->
+                                                listOf(R.string.chip_lz, R.string.chip_base_camp, R.string.chip_water_point)
+                                            else ->
+                                                listOf(R.string.chip_march, R.string.chip_lz, R.string.chip_water_point)
                                         }
                                     }
                                     chipsIds.forEach { chipResId ->
