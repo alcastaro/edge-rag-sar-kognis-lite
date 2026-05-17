@@ -230,10 +230,12 @@ class MainActivity : ComponentActivity() {
                 android.widget.Toast.makeText(this@MainActivity, "No text detected on label", android.widget.Toast.LENGTH_SHORT).show()
                 return@launch
             }
-            val query = io.kognis.tactical.core.agent.VisionAgent.buildMedicationQuery(ocr, en = false)
+            val query = io.kognis.tactical.core.agent.VisionAgent.buildMedicationQuery(ocr, en = true)
             android.widget.Toast.makeText(this@MainActivity, "Extracted ${ocr.rawText.length} chars · querying RAG", android.widget.Toast.LENGTH_SHORT).show()
             this@MainActivity.isInGeneration.value = true
-            sendText(query, "Siempre")
+            // ragMode "NoMap" suppresses the LOCATION_JSON appendix so vision queries
+            // never produce hallucinated map markers (perf log 2026-05-17 23:20:45 bug).
+            sendText(query, "NoMap")
         }
     }
 
@@ -351,6 +353,8 @@ class MainActivity : ComponentActivity() {
     // Service also parses + persists, but UI needs the parsed skill to render Quiz/Case cards.
     internal val skillBuffer = StringBuilder()
     @Volatile internal var skillCallback: ((io.kognis.tactical.core.learning.LearningSkill) -> Unit)? = null
+    /** Set by the Composable so sendText() can dismiss prior quiz/case cards on a new user turn. */
+    @Volatile internal var dismissTrainingCards: (() -> Unit)? = null
 
     private val fieldCallback = object : IFieldCallback.Stub() {
         override fun onTokenRetrieved(token: String) {
@@ -381,9 +385,21 @@ class MainActivity : ComponentActivity() {
             if (skillCallback != null && skillBuffer.isNotEmpty()) {
                 val text = skillBuffer.toString()
                 skillBuffer.clear()
-                io.kognis.tactical.core.learning.SkillCallExtractor.extract(text)?.let { sk ->
-                    runOnUiThread { skillCallback?.invoke(sk) }
+                val skill = io.kognis.tactical.core.learning.SkillCallExtractor.extract(text)
+                // Strip raw SKILL: {...} JSON from the displayed chat message; the rendered
+                // QuizCard / CaseStudyCard is the user-facing artifact.
+                val stripped = io.kognis.tactical.core.learning.SkillCallExtractor.strip(text)
+                if (stripped != text) {
+                    runOnUiThread {
+                        val hist = (chatMessageHistory.value ?: listOf()).toMutableList()
+                        val last = hist.lastOrNull()
+                        if (last?.role == "ASSISTANT") {
+                            hist[hist.lastIndex] = last.copy(text = stripped)
+                            chatMessageHistory.value = hist
+                        }
+                    }
                 }
+                if (skill != null) runOnUiThread { skillCallback?.invoke(skill) }
             } else {
                 skillBuffer.clear()
             }
@@ -907,7 +923,11 @@ class MainActivity : ComponentActivity() {
                     is io.kognis.tactical.core.learning.LearningSkill.ReviewPastMisses -> { /* handled in next turn's prompt */ }
                 }
             }
-            onDispose { this@MainActivity.skillCallback = null }
+            this@MainActivity.dismissTrainingCards = { pendingQuiz = null; pendingCase = null }
+            onDispose {
+                this@MainActivity.skillCallback = null
+                this@MainActivity.dismissTrainingCards = null
+            }
         }
         // Voice input agent state — on-device speech-to-text (SpeechRecognizer)
         var voiceListening by remember { mutableStateOf(false) }
@@ -2048,7 +2068,12 @@ class MainActivity : ComponentActivity() {
                                         }.getOrNull()
                                     }
                                     if (mod != null) {
-                                        io.kognis.tactical.views.CaseStudyCard(topic = mod.first, text = mod.second, keyPoints = mod.third)
+                                        io.kognis.tactical.views.CaseStudyCard(
+                                            topic = mod.first,
+                                            text = mod.second,
+                                            keyPoints = mod.third,
+                                            onDismiss = { pendingCase = null },
+                                        )
                                     }
                                 }
                                 pendingQuiz?.let { q ->
@@ -2062,6 +2087,7 @@ class MainActivity : ComponentActivity() {
                                         onAnswer = { correct, topic ->
                                             fieldCore?.recordQuizOutcome(topic, correct)
                                         },
+                                        onDismiss = { pendingQuiz = null },
                                     )
                                 }
 
@@ -2486,6 +2512,8 @@ class MainActivity : ComponentActivity() {
     private var querySentMs: Long = 0L
 
     internal fun sendText(input: String, ragMode: String = "Auto", isEval: Boolean = false) {
+        // Dismiss prior training cards when a new user turn starts.
+        runOnUiThread { dismissTrainingCards?.invoke() }
         var effectiveRagMode = ragMode
         if (!isEval) {
             val prep = io.kognis.tactical.core.map.QueryPreprocessor.preprocess(input)

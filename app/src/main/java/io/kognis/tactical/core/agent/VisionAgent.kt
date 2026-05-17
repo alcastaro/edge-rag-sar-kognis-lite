@@ -83,12 +83,12 @@ object VisionAgent {
                    else    "No se detectó texto en la etiqueta."
         }
         val labelText = ocr.blocks.joinToString(" · ").take(400)
-        return if (en) {
-            "Identify this medication and provide dosage from the humanitarian field protocol. " +
-            "Label text extracted by vision agent:\n\n$labelText"
-        } else {
-            "Identifica este medicamento y proporciona la dosis según el protocolo humanitario de campo. " +
-            "Texto de la etiqueta extraído por el agente de visión:\n\n$labelText"
-        }
+        // English prompt regardless of UI language — Gemma 4 E2B follows English
+        // instructions more reliably for structured medical Q&A. This is a vision
+        // pipeline, NOT a map command — instruct the model explicitly to skip LOCATION_JSON.
+        return "VISION INPUT (medication-label OCR). This is NOT a map command — do NOT emit LOCATION_JSON.\n" +
+               "Identify the medication and provide indications, dosage, and contraindications from the humanitarian field corpus. " +
+               "If you cannot identify the medication from the label, say so plainly.\n\n" +
+               "Label text extracted on-device:\n$labelText"
     }
 }

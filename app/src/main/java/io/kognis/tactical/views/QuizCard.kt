@@ -15,6 +15,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,6 +47,7 @@ fun QuizCard(
     correctIndex: Int,
     explanation: String,
     onAnswer: (correct: Boolean, topic: String) -> Unit,
+    onDismiss: () -> Unit = {},
 ) {
     var selected by remember { mutableStateOf<Int?>(null) }
     val amber = io.kognis.tactical.ui.theme.RescueAmber
@@ -58,10 +61,13 @@ fun QuizCard(
             .border(1.dp, borderColor, RoundedCornerShape(12.dp))
             .padding(12.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Text("QUIZ", color = amber, fontSize = 10.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
             Spacer(Modifier.size(8.dp))
-            Text("$topic · $difficulty", color = Color.LightGray, fontSize = 10.sp)
+            Text("$topic · $difficulty", color = Color.LightGray, fontSize = 10.sp, modifier = Modifier.weight(1f))
+            IconButton(onClick = onDismiss, modifier = Modifier.size(24.dp)) {
+                Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.Gray, modifier = Modifier.size(14.dp))
+            }
         }
         Spacer(Modifier.height(6.dp))
         Text(question, color = Color.White, style = MaterialTheme.typography.bodyMedium)

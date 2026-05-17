@@ -88,10 +88,21 @@ class FieldAssistantService : Service() {
                     // Training mode: if a learning session is active, override the system
                     // prompt with the Hermes-style 4-section build and persist this turn.
                     val learning = learningOrchestrator
-                    if (learning != null && learning.isActive) {
-                        orchestrator.customSystemPrompt = learning.systemPromptForActiveSession()
+                    val trainingActive = learning != null && learning.isActive
+                    var effectiveQuery = query
+                    var effectiveMode = mode
+                    if (trainingActive) {
+                        orchestrator.customSystemPrompt = learning!!.systemPromptForActiveSession()
                         learning.appendUserTurn(query)
                         learningBuffer.clear()
+                        // Force RAG ON during training — corpus is the authoritative source
+                        // for SAR protocols. Auto/NoMap can cause empty retrieval.
+                        effectiveMode = "Siempre"
+                        // Suffix the user message with a strong SKILL reminder. Gemma 4 E2B
+                        // follows end-of-prompt instructions more reliably than start-of-prompt.
+                        effectiveQuery = query + "\n\n[REMINDER: end your reply with `SKILL: {...}` " +
+                            "on the FINAL line. Pick exactly ONE of: show_example, quiz_user, " +
+                            "review_past_misses, mark_mastery. Do NOT wrap the JSON in markdown.]"
                     } else {
                         orchestrator.customSystemPrompt = null
                     }
@@ -105,7 +116,7 @@ class FieldAssistantService : Service() {
                         return@launch
                     }
 
-                    val ragResult = orchestrator.evaluate(query, mode, null, null)
+                    val ragResult = orchestrator.evaluate(effectiveQuery, effectiveMode, null, null)
                     val ragJson = buildRagMetadataJson(ragResult)
                     safeCallback { it.onRagMetadata(ragJson) }
 
