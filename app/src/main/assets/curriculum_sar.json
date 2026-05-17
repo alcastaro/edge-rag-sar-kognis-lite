@@ -1,0 +1,166 @@
+{
+  "id": "insarag-iec-2024",
+  "title": "INSARAG IEC-aligned SAR fundamentals",
+  "language": "es",
+  "version": 1,
+  "modules": [
+    {
+      "id": "march",
+      "topic": "MARCH protocol",
+      "difficulty": "intermediate",
+      "summary": "Massive bleeding control · Airway · Respiration · Circulation · Head/Hypothermia. Combat-derived trauma protocol adopted by INSARAG medical teams for crush injuries and complex extrications.",
+      "case_studies": [
+        {
+          "id": "march-01",
+          "text": "M6.8 earthquake. 3-story collapse. Adult male, ~40 yrs, lower-limb crush under concrete slab. Pulse 130, RR 28, conscious but pale. Distal pulse absent on the trapped leg. Estimated 4 hours of entrapment. Team has 18 minutes before extrication risk for crush syndrome increases.",
+          "key_points": [
+            "tourniquet applied above injury proximal to bleed site",
+            "distal pulse re-checked within 60 seconds post-application",
+            "tourniquet application time recorded on patient skin or tag",
+            "fluid resuscitation prepared BEFORE extrication for crush syndrome"
+          ]
+        },
+        {
+          "id": "march-02",
+          "text": "Building fire, partial collapse. Adult female, 30s, head laceration with arterial bleed. GCS 12, agitated. Airway patent but laboured. Smoke inhalation suspected.",
+          "key_points": [
+            "direct pressure + hemostatic gauze on scalp arterial bleed",
+            "early SpO2 monitoring for carbon monoxide concern",
+            "C-spine precaution maintained during airway management",
+            "transport to advanced medical post within golden hour"
+          ]
+        }
+      ],
+      "quiz_seeds": [
+        {
+          "prompt": "In MARCH, what is the FIRST action for a catastrophic limb hemorrhage?",
+          "options": ["Open the airway", "Apply tourniquet proximal to wound", "Start IV fluids", "Position for shock"],
+          "correct_index": 1,
+          "explanation": "Massive bleeding kills fastest. Tourniquet placement BEFORE airway is the MARCH ordering — preventable mortality is dominated by uncontrolled hemorrhage in field trauma."
+        },
+        {
+          "prompt": "After tourniquet application, what time-critical action is required?",
+          "options": ["Loosen the tourniquet every 15 minutes", "Record application time on the patient", "Cover the tourniquet to reduce shock", "Replace with a pressure dressing within 5 minutes"],
+          "correct_index": 1,
+          "explanation": "The receiving team needs the application time to decide on extended-care management. Never loosen a tourniquet in the field without surgical capability."
+        }
+      ]
+    },
+    {
+      "id": "triage-start",
+      "topic": "START triage",
+      "difficulty": "beginner",
+      "summary": "Simple Triage And Rapid Treatment. 4-color casualty classification used at multi-casualty incidents: RED (immediate), YELLOW (delayed), GREEN (walking wounded), BLACK (deceased or expectant).",
+      "case_studies": [
+        {
+          "id": "triage-01",
+          "text": "Bus rollover, 12 casualties. First-arriving SAR team. Two responders. You have 6 minutes to triage the entire scene before more help arrives.",
+          "key_points": [
+            "anyone walking is GREEN — direct to a fixed location",
+            "non-walking: assess respiration first. No breathing after airway open = BLACK",
+            "respiration > 30 breaths/min = RED",
+            "no radial pulse OR capillary refill > 2 sec = RED",
+            "altered mental status (cannot follow simple command) = RED"
+          ]
+        }
+      ],
+      "quiz_seeds": [
+        {
+          "prompt": "In START triage, an adult with respirations of 36/min should be classified:",
+          "options": ["GREEN", "YELLOW", "RED", "BLACK"],
+          "correct_index": 2,
+          "explanation": "RR > 30 in adults triggers RED in START regardless of perfusion or mental status."
+        },
+        {
+          "prompt": "A casualty who walks to you complaining of arm pain is classified:",
+          "options": ["RED", "YELLOW", "GREEN", "BLACK — pending re-assessment"],
+          "correct_index": 2,
+          "explanation": "Walking wounded are GREEN by definition in START. Move them to a fixed location and re-assess only if scene allows."
+        }
+      ]
+    },
+    {
+      "id": "hazard-types",
+      "topic": "Hazard classification",
+      "difficulty": "beginner",
+      "summary": "Eight SAR hazard categories used in Kognis Lite marker types: VICTIM, MEDICAL, HAZARD (structural · chemical · fire · flood), COMMAND, EXTRACTION, MISSING, BASE, WATER. Correct classification at the marker level drives downstream resource allocation.",
+      "case_studies": [
+        {
+          "id": "hazard-01",
+          "text": "Industrial facility post-flood. Operator sees a chemical smell, eye irritation, several rusted drums leaking unknown fluid. Wind direction is variable. Three civilians 50m downwind.",
+          "key_points": [
+            "mark as HAZARD (chemical sub-type)",
+            "stand-off distance based on visible plume + symptoms — minimum 30m",
+            "evacuate downwind civilians FIRST",
+            "report to ICP with wind direction + estimated plume size"
+          ]
+        }
+      ],
+      "quiz_seeds": [
+        {
+          "prompt": "A partially collapsed bridge structure should be marked as which Kognis marker type?",
+          "options": ["EXTRACTION", "HAZARD", "COMMAND", "BASE"],
+          "correct_index": 1,
+          "explanation": "Structural compromise = HAZARD. EXTRACTION is reserved for helicopter LZs and evacuation points."
+        }
+      ]
+    },
+    {
+      "id": "extraction-lz",
+      "topic": "Helicopter LZ selection",
+      "difficulty": "intermediate",
+      "summary": "Helicopter Landing Zone criteria for medevac and resource insertion: minimum size 30m × 30m for medium utility, surface firmness, slope < 7°, clear of overhead obstacles (>15m radius), prevailing wind alignment, ground crew protocol.",
+      "case_studies": [
+        {
+          "id": "lz-01",
+          "text": "Earthquake response. Need to evacuate two RED casualties. Available terrain: a school football field (40m × 60m, grass, minor debris), a paved parking lot (35m × 35m, ringed by 8m streetlights), and an open hillside (slope ~12°, no obstructions).",
+          "key_points": [
+            "school field is best — size + surface + no overhead",
+            "parking lot rejected: 8m streetlights are within rotor wash radius",
+            "hillside rejected: slope > 7° unsafe for skid landing",
+            "remove all debris from chosen LZ before approach call"
+          ]
+        }
+      ],
+      "quiz_seeds": [
+        {
+          "prompt": "The MINIMUM safe LZ size for a medium utility helicopter (e.g. UH-60) on a SAR operation is:",
+          "options": ["10m × 10m", "20m × 20m", "30m × 30m", "50m × 50m"],
+          "correct_index": 2,
+          "explanation": "30m × 30m is the INSARAG minimum for medium utility. Larger is always preferred; smaller is acceptable only for light helicopters in true emergency."
+        }
+      ]
+    },
+    {
+      "id": "comms-radio",
+      "topic": "Radio protocols",
+      "difficulty": "beginner",
+      "summary": "SITREP structure, callsign discipline, brevity codes used by INSARAG / UNDAC field teams. Standard formats prevent ambiguity under stress, low signal, multilingual teams.",
+      "case_studies": [
+        {
+          "id": "comms-01",
+          "text": "Sector lead reports to ICP after the first hour on scene. They have completed initial survey of 3 collapse sites, identified 2 confirmed survivors with audible response, 4 missing persons reported by family, and 1 active chemical leak 200m east.",
+          "key_points": [
+            "SITREP format: location · situation · activity · request",
+            "use phonetic alphabet for site IDs",
+            "absolute coordinates over relative descriptions when reporting hazards",
+            "request EXPLICIT acknowledgement before signing off"
+          ]
+        }
+      ],
+      "quiz_seeds": [
+        {
+          "prompt": "In a SITREP, the correct order of elements is:",
+          "options": [
+            "Request · Situation · Location · Activity",
+            "Location · Situation · Activity · Request",
+            "Situation · Location · Request · Activity",
+            "Activity · Location · Situation · Request"
+          ],
+          "correct_index": 1,
+          "explanation": "Location-Situation-Activity-Request (LSAR) is the INSARAG-standard ordering. Location FIRST anchors the report; request LAST so the receiver has full context before deciding."
+        }
+      ]
+    }
+  ]
+}

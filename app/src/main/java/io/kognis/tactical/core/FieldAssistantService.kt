@@ -31,6 +31,10 @@ class FieldAssistantService : Service() {
     private var modelRunner: ModelRunner? = null
     private var ragOrchestrator: RagOrchestrator? = null
     private var boxStore: io.objectbox.BoxStore? = null
+    private var learningOrchestrator: io.kognis.tactical.core.learning.LearningOrchestrator? = null
+    // Accumulates the assistant's tokens for the current turn so we can persist the
+    // full text into the learning session (and parse the SKILL: tag) on completion.
+    private val learningBuffer = StringBuilder()
 
     private var currentModelName = "Gemma4-E2B"
     private var currentQuant = "litertlm"
@@ -81,6 +85,17 @@ class FieldAssistantService : Service() {
                         return@launch
                     }
 
+                    // Training mode: if a learning session is active, override the system
+                    // prompt with the Hermes-style 4-section build and persist this turn.
+                    val learning = learningOrchestrator
+                    if (learning != null && learning.isActive) {
+                        orchestrator.customSystemPrompt = learning.systemPromptForActiveSession()
+                        learning.appendUserTurn(query)
+                        learningBuffer.clear()
+                    } else {
+                        orchestrator.customSystemPrompt = null
+                    }
+
                     if (ThermalGovernor.isOverheating()) {
                         val temp = ThermalGovernor.getCpuTemperature()
                         safeCallback { it.onError(s(
@@ -104,6 +119,7 @@ class FieldAssistantService : Service() {
                         if (response is MessageResponse.Chunk) {
                             if (firstTokenTime == -1L) firstTokenTime = System.currentTimeMillis()
                             pendingDelta.append(response.text)
+                            if (learningOrchestrator?.isActive == true) learningBuffer.append(response.text)
                             tokenCount++
                             val now = System.currentTimeMillis()
                             if (now - lastEmitMs >= 50L) {
@@ -119,6 +135,13 @@ class FieldAssistantService : Service() {
                     }.onCompletion {
                         if (pendingDelta.isNotEmpty()) {
                             safeCallback { it.onTokenRetrieved(pendingDelta.toString()) }
+                        }
+                        // Persist the assistant's full turn into the learning session
+                        // and dispatch any SKILL: tag it emitted.
+                        val active = learningOrchestrator
+                        if (active != null && active.isActive && learningBuffer.isNotEmpty()) {
+                            active.appendAssistantTurn(learningBuffer.toString(), tokenCount)
+                            learningBuffer.clear()
                         }
                         val endTime = System.currentTimeMillis()
                         val diffS = (endTime - startTime) / 1000.0
@@ -243,6 +266,44 @@ class FieldAssistantService : Service() {
                     safeCallback { it.onError(s("Error restaurando KB: ${e.message}", "KB restore failed: ${e.message}")) }
                 }
             }
+        }
+
+        // ── Adaptive learning subsystem ─────────────────────────────────
+        override fun startLearningSession(curriculumUriString: String?): Long {
+            val store = boxStore ?: return 0L
+            val orch = learningOrchestrator ?: io.kognis.tactical.core.learning.LearningOrchestrator(
+                this@FieldAssistantService, store,
+            ).also { learningOrchestrator = it }
+            val sid = orch.startSession(curriculumUriString)
+            // Force a conversation reset so the new system prompt takes hold.
+            ragOrchestrator?.resetConversation()
+            safeCallback {
+                it.onStatusChange(s(
+                    "Sesión de entrenamiento iniciada (sid=$sid)",
+                    "Training session started (sid=$sid)",
+                ))
+            }
+            return sid
+        }
+
+        override fun getLearnerModelJson(): String =
+            learningOrchestrator?.learnerModelJson() ?: "{}"
+
+        override fun endLearningSession() {
+            learningOrchestrator?.endSession()
+            ragOrchestrator?.customSystemPrompt = null
+            ragOrchestrator?.resetConversation()
+            safeCallback {
+                it.onStatusChange(s(
+                    "Sesión de entrenamiento cerrada",
+                    "Training session closed",
+                ))
+            }
+        }
+
+        override fun recordQuizOutcome(topic: String?, correct: Boolean) {
+            if (topic.isNullOrBlank()) return
+            learningOrchestrator?.recordQuizOutcome(topic, correct)
         }
 
         override fun clearConversation() {

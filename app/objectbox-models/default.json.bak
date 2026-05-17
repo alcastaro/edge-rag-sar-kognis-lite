@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:7316596027667041176",
-      "lastPropertyId": "5:1036232833906383103",
+      "lastPropertyId": "6:7707105497230797526",
       "name": "DocumentChunk",
       "properties": [
         {
@@ -34,6 +34,11 @@
         {
           "id": "5:1036232833906383103",
           "name": "chunkId",
+          "type": 9
+        },
+        {
+          "id": "6:7707105497230797526",
+          "name": "sourcePage",
           "type": 9
         }
       ],

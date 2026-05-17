@@ -173,8 +173,18 @@ class RagOrchestrator(
     internal fun shouldResetConversation(promptHash: Int): Boolean =
         activeConversation == null || promptHash != lastPromptHash || turnCount >= maxTurns
 
+    /**
+     * Override the system prompt for the next turn. Set by [LearningOrchestrator]
+     * when a training session is active so the model receives the 4-section
+     * Hermes-style prompt instead of the standard field-assistant prompt.
+     *
+     * Null = revert to the default builder. Hash change forces a fresh KV-cache.
+     */
+    @Volatile var customSystemPrompt: String? = null
+
     @VisibleForTesting
     internal fun buildSystemPrompt(radioMode: Boolean = false): String {
+        customSystemPrompt?.let { return it }
         return RagPromptBuilder.buildSystemPrompt(verbosityLevel, language, modelSize, radioMode, mapMode)
     }
 

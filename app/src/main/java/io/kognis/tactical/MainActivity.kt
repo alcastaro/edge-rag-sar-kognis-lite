@@ -347,11 +347,17 @@ class MainActivity : ComponentActivity() {
     internal val ttsBuffer = StringBuilder()
     internal var ttsAgent: io.kognis.tactical.core.agent.TtsAgent? = null
 
+    // Adaptive learning — accumulates assistant tokens to parse SKILL: tag client-side.
+    // Service also parses + persists, but UI needs the parsed skill to render Quiz/Case cards.
+    internal val skillBuffer = StringBuilder()
+    @Volatile internal var skillCallback: ((io.kognis.tactical.core.learning.LearningSkill) -> Unit)? = null
+
     private val fieldCallback = object : IFieldCallback.Stub() {
         override fun onTokenRetrieved(token: String) {
             android.util.Log.d("MainActivity", "onTokenRetrieved: ${token.length} chars")
             if (evalDeferred != null) evalBuffer.append(token)
             if (ttsEnabled) ttsBuffer.append(token)
+            if (skillCallback != null) skillBuffer.append(token)
             runOnUiThread {
                 appendToLastAssistantMessage(token)
             }
@@ -370,6 +376,16 @@ class MainActivity : ComponentActivity() {
                 runOnUiThread { ttsAgent?.speak(text) }
             } else {
                 ttsBuffer.clear()
+            }
+            // Parse SKILL: tag from the assistant's final text — used to render QuizCard / CaseStudyCard
+            if (skillCallback != null && skillBuffer.isNotEmpty()) {
+                val text = skillBuffer.toString()
+                skillBuffer.clear()
+                io.kognis.tactical.core.learning.SkillCallExtractor.extract(text)?.let { sk ->
+                    runOnUiThread { skillCallback?.invoke(sk) }
+                }
+            } else {
+                skillBuffer.clear()
             }
             runOnUiThread {
                 isInGeneration.value = false
@@ -873,6 +889,26 @@ class MainActivity : ComponentActivity() {
         var gisProgress by remember { mutableStateOf(0) }
         var gisTotal by remember { mutableStateOf(0) }
         var gisJob by remember { mutableStateOf<Job?>(null) }
+        // Adaptive learning mode state — set when a training session is active.
+        var trainingActive by remember { mutableStateOf(false) }
+        var trainingSessionId by remember { mutableStateOf(0L) }
+        var showLearnerPanel by remember { mutableStateOf(false) }
+        var learnerModelJson by remember { mutableStateOf("{}") }
+        // The most recent quiz/case-study card to render below the chat
+        var pendingQuiz by remember { mutableStateOf<io.kognis.tactical.core.learning.LearningSkill.QuizUser?>(null) }
+        var pendingCase by remember { mutableStateOf<io.kognis.tactical.core.learning.LearningSkill.ShowExample?>(null) }
+        // Register the skill callback once — fired by fieldCallback.onGenerationComplete.
+        DisposableEffect(Unit) {
+            this@MainActivity.skillCallback = { skill ->
+                when (skill) {
+                    is io.kognis.tactical.core.learning.LearningSkill.QuizUser -> pendingQuiz = skill
+                    is io.kognis.tactical.core.learning.LearningSkill.ShowExample -> pendingCase = skill
+                    is io.kognis.tactical.core.learning.LearningSkill.MarkMastery -> { /* state already updated by service */ }
+                    is io.kognis.tactical.core.learning.LearningSkill.ReviewPastMisses -> { /* handled in next turn's prompt */ }
+                }
+            }
+            onDispose { this@MainActivity.skillCallback = null }
+        }
         // Voice input agent state — on-device speech-to-text (SpeechRecognizer)
         var voiceListening by remember { mutableStateOf(false) }
         var voiceError by remember { mutableStateOf<String?>(null) }
@@ -1249,6 +1285,62 @@ class MainActivity : ComponentActivity() {
                     }, verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Default.CloudUpload, null, tint=androidx.compose.ui.graphics.Color.White); Spacer(Modifier.width(16.dp)); Column { Text("Import map markers", color=androidx.compose.ui.graphics.Color.White, style = MaterialTheme.typography.bodyLarge); Text("Load locations from JSON (same format as export)", color=androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.labelSmall) } }
 
                     androidx.compose.material3.Divider(color = androidx.compose.ui.graphics.Color.DarkGray, modifier = Modifier.padding(vertical = 4.dp))
+
+                    // Adaptive learning controls
+                    Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable {
+                        showSettingsMenu = false
+                        try {
+                            val sid = fieldCore?.startLearningSession(null) ?: 0L
+                            if (sid > 0L) {
+                                trainingActive = true
+                                trainingSessionId = sid
+                                android.widget.Toast.makeText(this@MainActivity, "Training session #$sid started", android.widget.Toast.LENGTH_SHORT).show()
+                            } else {
+                                android.widget.Toast.makeText(this@MainActivity, "Failed to start training session", android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            android.widget.Toast.makeText(this@MainActivity, "Training error: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+                        }
+                    }, verticalAlignment = Alignment.CenterVertically) {
+                        Icon(painterResource(android.R.drawable.ic_menu_agenda), null, tint = if (!trainingActive) io.kognis.tactical.ui.theme.RescueAmber else androidx.compose.ui.graphics.Color.Gray)
+                        Spacer(Modifier.width(16.dp))
+                        Column {
+                            Text(if (trainingActive) "Training session active" else "Start SAR training", color = androidx.compose.ui.graphics.Color.White, style = MaterialTheme.typography.bodyLarge)
+                            Text("Adaptive multi-tool learning · INSARAG curriculum", color = androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                    if (trainingActive) {
+                        Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable {
+                            showSettingsMenu = false
+                            learnerModelJson = fieldCore?.getLearnerModelJson() ?: "{}"
+                            showLearnerPanel = true
+                        }, verticalAlignment = Alignment.CenterVertically) {
+                            Icon(painterResource(android.R.drawable.ic_menu_view), null, tint = io.kognis.tactical.ui.theme.RescueAmber)
+                            Spacer(Modifier.width(16.dp))
+                            Column {
+                                Text("Learner progress", color = androidx.compose.ui.graphics.Color.White, style = MaterialTheme.typography.bodyLarge)
+                                Text("Mastery, recent misses, skill activity", color = androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                        Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable {
+                            showSettingsMenu = false
+                            fieldCore?.endLearningSession()
+                            trainingActive = false
+                            trainingSessionId = 0L
+                            pendingQuiz = null
+                            pendingCase = null
+                            android.widget.Toast.makeText(this@MainActivity, "Training session closed", android.widget.Toast.LENGTH_SHORT).show()
+                        }, verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Close, null, tint = androidx.compose.ui.graphics.Color(0xFFEF5350))
+                            Spacer(Modifier.width(16.dp))
+                            Column {
+                                Text("End training session", color = androidx.compose.ui.graphics.Color.White, style = MaterialTheme.typography.bodyLarge)
+                                Text("Save summary + promote facts to long-term memory", color = androidx.compose.ui.graphics.Color.Gray, style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                    }
+
+                    androidx.compose.material3.Divider(color = androidx.compose.ui.graphics.Color.DarkGray, modifier = Modifier.padding(vertical = 4.dp))
                     Row(Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable {
                         showSettingsMenu = false
                         this@MainActivity.launchVisionCamera()
@@ -1435,6 +1527,15 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+            }
+        }
+
+        if (showLearnerPanel) {
+            @OptIn(ExperimentalMaterial3Api::class)
+            val sheet = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
+            ModalBottomSheet(onDismissRequest = { showLearnerPanel = false }, sheetState = sheet,
+                              containerColor = io.kognis.tactical.ui.theme.MachinedGraphite) {
+                io.kognis.tactical.views.LearnerPanel(modelJson = learnerModelJson)
             }
         }
 
@@ -1922,6 +2023,48 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                                 
+                                // Training-mode cards: rendered above the input when present
+                                pendingCase?.let { case ->
+                                    val mod = remember(case.topic) {
+                                        // Pull case-study text from the curriculum cache via the orchestrator (best-effort)
+                                        runCatching {
+                                            val raw = applicationContext.assets.open("curriculum_sar.json").bufferedReader().use { it.readText() }
+                                            val root = org.json.JSONObject(raw)
+                                            val mods = root.optJSONArray("modules") ?: org.json.JSONArray()
+                                            var hit: Triple<String, String, List<String>>? = null
+                                            for (i in 0 until mods.length()) {
+                                                val m = mods.optJSONObject(i) ?: continue
+                                                if (m.optString("topic").equals(case.topic, ignoreCase = true)) {
+                                                    val cs = m.optJSONArray("case_studies") ?: org.json.JSONArray()
+                                                    if (cs.length() > 0) {
+                                                        val c = cs.optJSONObject(0)!!
+                                                        val kp = c.optJSONArray("key_points") ?: org.json.JSONArray()
+                                                        hit = Triple(case.topic, c.optString("text", ""), (0 until kp.length()).map { kp.optString(it) })
+                                                    }
+                                                    break
+                                                }
+                                            }
+                                            hit
+                                        }.getOrNull()
+                                    }
+                                    if (mod != null) {
+                                        io.kognis.tactical.views.CaseStudyCard(topic = mod.first, text = mod.second, keyPoints = mod.third)
+                                    }
+                                }
+                                pendingQuiz?.let { q ->
+                                    io.kognis.tactical.views.QuizCard(
+                                        topic = q.topic,
+                                        difficulty = q.difficulty,
+                                        question = q.question,
+                                        options = q.options,
+                                        correctIndex = q.correctIndex,
+                                        explanation = q.explanation,
+                                        onAnswer = { correct, topic ->
+                                            fieldCore?.recordQuizOutcome(topic, correct)
+                                        },
+                                    )
+                                }
+
                                 // Nueva Input Bar Gemini-Style Multiline
                                 Box(modifier = Modifier.fillMaxWidth().background(io.kognis.tactical.ui.theme.MachinedGraphite, RoundedCornerShape(24.dp)).padding(all = 8.dp)) {
                                     Column {
@@ -2129,7 +2272,7 @@ class MainActivity : ComponentActivity() {
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Powered by Gemma 4",
+                        text = if (trainingActive) "Powered by Gemma 4 E2B · Training" else "Powered by Gemma 4 E2B",
                         color = io.kognis.tactical.ui.theme.RescueAmber,
                         style = MaterialTheme.typography.labelSmall
                     )

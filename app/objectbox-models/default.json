@@ -43,10 +43,389 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "2:628490512170556542",
+      "lastPropertyId": "9:2528945584147871684",
+      "name": "CurriculumModule",
+      "properties": [
+        {
+          "id": "1:7914744659100528494",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5969834873913716416",
+          "name": "curriculumId",
+          "indexId": "2:4440495237462180524",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:8879384790511115005",
+          "name": "moduleId",
+          "indexId": "3:4824528952110710001",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:2947374671112751479",
+          "name": "topic",
+          "type": 9
+        },
+        {
+          "id": "5:4038997854051850011",
+          "name": "difficulty",
+          "type": 9
+        },
+        {
+          "id": "6:3334615932573151615",
+          "name": "summary",
+          "type": 9
+        },
+        {
+          "id": "7:3423062132037339599",
+          "name": "caseStudiesJson",
+          "type": 9
+        },
+        {
+          "id": "8:8501110448103888832",
+          "name": "quizSeedsJson",
+          "type": 9
+        },
+        {
+          "id": "9:2528945584147871684",
+          "name": "loadedTs",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:7853158121097537681",
+      "lastPropertyId": "10:6021721576346308977",
+      "name": "LearningFact",
+      "properties": [
+        {
+          "id": "1:3021791533194484034",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6589400683703238667",
+          "name": "sessionId",
+          "indexId": "4:7920467985691193718",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:5969088613215797403",
+          "name": "subject",
+          "indexId": "5:6116866298697336007",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:809525460436184067",
+          "name": "predicate",
+          "type": 9
+        },
+        {
+          "id": "5:1347905164840359033",
+          "name": "objectStr",
+          "type": 9
+        },
+        {
+          "id": "6:8915356561714866913",
+          "name": "confidence",
+          "type": 8
+        },
+        {
+          "id": "7:3952333158743479516",
+          "name": "tokensIdx",
+          "indexId": "6:3361342485305453813",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "8:4187386502518593022",
+          "name": "supersededBy",
+          "type": 6
+        },
+        {
+          "id": "9:2753975574914523278",
+          "name": "crossSession",
+          "type": 1
+        },
+        {
+          "id": "10:6021721576346308977",
+          "name": "ts",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "4:167975162115761346",
+      "lastPropertyId": "4:1970462451309786505",
+      "name": "LearningPreference",
+      "properties": [
+        {
+          "id": "1:6185690604507895058",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3280249082340267882",
+          "name": "key",
+          "indexId": "7:5026724656933237135",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:2528899832258334039",
+          "name": "value",
+          "type": 9
+        },
+        {
+          "id": "4:1970462451309786505",
+          "name": "updatedTs",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "5:2843285873066133336",
+      "lastPropertyId": "7:6268466399794881134",
+      "name": "LearningSession",
+      "properties": [
+        {
+          "id": "1:5584145136311566117",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7385077608735325144",
+          "name": "curriculumId",
+          "indexId": "8:5267221086907174300",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:2791248682935734246",
+          "name": "startTs",
+          "type": 6
+        },
+        {
+          "id": "4:7119078972411859466",
+          "name": "closeTs",
+          "type": 6
+        },
+        {
+          "id": "5:1810380751180421575",
+          "name": "summaryShortText",
+          "type": 9
+        },
+        {
+          "id": "6:5866816554433283589",
+          "name": "language",
+          "type": 9
+        },
+        {
+          "id": "7:6268466399794881134",
+          "name": "turnCount",
+          "type": 5
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "6:2866415152987915208",
+      "lastPropertyId": "7:5850165850723783764",
+      "name": "LearningSummary",
+      "properties": [
+        {
+          "id": "1:6393468500773348960",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1842002857733907595",
+          "name": "sessionId",
+          "indexId": "9:4287681232922255572",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:5214014854028349628",
+          "name": "kind",
+          "type": 9
+        },
+        {
+          "id": "4:2333042504791616345",
+          "name": "coverFromTurn",
+          "type": 5
+        },
+        {
+          "id": "5:63290816308942605",
+          "name": "coverToTurn",
+          "type": 5
+        },
+        {
+          "id": "6:2122972150294691909",
+          "name": "text",
+          "type": 9
+        },
+        {
+          "id": "7:5850165850723783764",
+          "name": "ts",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "7:8003916876595023566",
+      "lastPropertyId": "7:5731592622628691569",
+      "name": "LearningTurn",
+      "properties": [
+        {
+          "id": "1:3117643946494378312",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2692912595860052051",
+          "name": "sessionId",
+          "indexId": "10:2822053712990560981",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:3210849688412579572",
+          "name": "turnIndex",
+          "type": 5
+        },
+        {
+          "id": "4:2182489438385755476",
+          "name": "role",
+          "type": 9
+        },
+        {
+          "id": "5:4650877008867342440",
+          "name": "text",
+          "type": 9
+        },
+        {
+          "id": "6:5477005562071458908",
+          "name": "tokens",
+          "type": 5
+        },
+        {
+          "id": "7:5731592622628691569",
+          "name": "ts",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "8:2969504122989132945",
+      "lastPropertyId": "6:2999329592195598740",
+      "name": "SkillInvocation",
+      "properties": [
+        {
+          "id": "1:8734623933740417688",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:762583327467065214",
+          "name": "sessionId",
+          "indexId": "11:8482882620607223434",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:304250092038384415",
+          "name": "skill",
+          "type": 9
+        },
+        {
+          "id": "4:7077455318109149462",
+          "name": "argsJson",
+          "type": 9
+        },
+        {
+          "id": "5:1455393993533033317",
+          "name": "outcomeJson",
+          "type": 9
+        },
+        {
+          "id": "6:2999329592195598740",
+          "name": "ts",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "9:6244879757744592776",
+      "lastPropertyId": "7:7357330473740245554",
+      "name": "TopicMastery",
+      "properties": [
+        {
+          "id": "1:3459691876203460807",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3190381924474487897",
+          "name": "topic",
+          "indexId": "12:8173307964676223553",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:6081022411963383932",
+          "name": "mastery",
+          "type": 8
+        },
+        {
+          "id": "4:808016757384870720",
+          "name": "nSeen",
+          "type": 5
+        },
+        {
+          "id": "5:2659063551850774164",
+          "name": "nCorrect",
+          "type": 5
+        },
+        {
+          "id": "6:5516391123424015876",
+          "name": "updatedTs",
+          "type": 6
+        },
+        {
+          "id": "7:7357330473740245554",
+          "name": "decayTs",
+          "type": 6
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "1:7316596027667041176",
-  "lastIndexId": "1:5432958024664745026",
+  "lastEntityId": "9:6244879757744592776",
+  "lastIndexId": "12:8173307964676223553",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

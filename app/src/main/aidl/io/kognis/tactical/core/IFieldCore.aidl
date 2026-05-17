@@ -16,4 +16,14 @@ interface IFieldCore {
     void updateKnowledgeBase(String uriString);
     void restoreKnowledgeBase();
     void clearConversation();
+
+    // ── Adaptive learning subsystem (Sprint S28) ──────────────────────────
+    /** Start a training session. Returns sessionId as long; 0 = failure. */
+    long startLearningSession(String curriculumUriString);
+    /** Returns JSON snapshot of learner model (mastery, prefs, recent facts). */
+    String getLearnerModelJson();
+    /** End current training session: write summary, promote high-confidence facts. */
+    void endLearningSession();
+    /** Record a quiz outcome from the UI. correct=true|false. */
+    void recordQuizOutcome(String topic, boolean correct);
 }
