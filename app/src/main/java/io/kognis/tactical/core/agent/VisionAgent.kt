@@ -50,8 +50,15 @@ object VisionAgent {
     suspend fun recognizeFromPath(path: String): OcrResult {
         val bitmap = BitmapFactory.decodeFile(path)
             ?: return OcrResult(rawText = "", blocks = emptyList())
-        val image = InputImage.fromBitmap(bitmap, 0)
-        return runRecognizer(image)
+        return try {
+            val image = InputImage.fromBitmap(bitmap, 0)
+            runRecognizer(image)
+        } finally {
+            // ML Kit's InputImage.fromBitmap does NOT take ownership; bitmap stays on
+            // the heap until GC. Vision is fired twice in the demo (Act 3 + a retake);
+            // unrecycled the second decode can OOM under thermal pressure on S24 Ultra.
+            runCatching { bitmap.recycle() }
+        }
     }
 
     private suspend fun runRecognizer(image: InputImage): OcrResult =
@@ -74,21 +81,36 @@ object VisionAgent {
         }
 
     /**
-     * Compose a prompt from OCR output for the RAG pipeline.
-     * Routes the extracted label text into a dosage-lookup query.
+     * Two-part query for the medication-OCR flow.
+     *
+     * `embeddingQuery` is the clean label text routed through the embedding/RAG
+     * pipeline. The verbose system instructions are NOT embedded because they
+     * dilute the semantic signal of `multilingual-e5-small` — pre-fix logs
+     * showed `chunks: []` even when the corpus contained relevant medication
+     * data, because the boilerplate dominated the embedding vector.
+     *
+     * `userMessage` is what the LLM sees. Instructions are appended AFTER the
+     * label text, so retrieval is fed clean tokens but the model still gets
+     * the "no LOCATION_JSON, answer from corpus" guidance.
      */
-    fun buildMedicationQuery(ocr: OcrResult, en: Boolean): String {
+    data class MedicationQuery(val embeddingQuery: String, val userMessage: String)
+
+    fun buildMedicationQuery(ocr: OcrResult, en: Boolean): MedicationQuery {
         if (ocr.isEmpty) {
-            return if (en) "No text detected on label."
-                   else    "No se detectó texto en la etiqueta."
+            val msg = if (en) "No text detected on label."
+                      else    "No se detectó texto en la etiqueta."
+            return MedicationQuery(embeddingQuery = msg, userMessage = msg)
         }
         val labelText = ocr.blocks.joinToString(" · ").take(400)
-        // English prompt regardless of UI language — Gemma 4 E2B follows English
-        // instructions more reliably for structured medical Q&A. This is a vision
-        // pipeline, NOT a map command — instruct the model explicitly to skip LOCATION_JSON.
-        return "VISION INPUT (medication-label OCR). This is NOT a map command — do NOT emit LOCATION_JSON.\n" +
-               "Identify the medication and provide indications, dosage, and contraindications from the humanitarian field corpus. " +
-               "If you cannot identify the medication from the label, say so plainly.\n\n" +
-               "Label text extracted on-device:\n$labelText"
+        // Clean retrieval query — drug name + form tokens are what we want the
+        // embedding to weight. No system instructions, no negative prompts.
+        val embeddingQuery = "medication label: $labelText"
+        // English instructions regardless of UI language — Gemma 4 E2B follows
+        // English instructions more reliably for structured medical Q&A.
+        val userMessage = "Identify the medication and provide indications, dosage, " +
+            "and contraindications from the humanitarian field corpus. If the label " +
+            "data is not in the corpus, say so plainly. Do NOT emit LOCATION_JSON.\n\n" +
+            "Label text extracted on-device:\n$labelText"
+        return MedicationQuery(embeddingQuery, userMessage)
     }
 }

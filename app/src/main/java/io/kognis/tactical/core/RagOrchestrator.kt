@@ -121,9 +121,13 @@ class RagOrchestrator(
     private fun getOrCreateConversation(radioMode: Boolean): Conversation {
         val prompt = buildSystemPrompt(radioMode)
         val hash = prompt.hashCode()
-        if (activeConversation == null || hash != lastPromptHash || turnCount >= maxTurns) {
+        // Capture into a local so a concurrent resetConversation() (triggered by cancel,
+        // language change, or training end) cannot null the field between allocation
+        // and return. Without this the !! at the end races and crashes :field_core.
+        var conv = activeConversation
+        if (conv == null || hash != lastPromptHash || turnCount >= maxTurns) {
             val reason = when {
-                activeConversation == null -> "first"
+                conv == null               -> "first"
                 hash != lastPromptHash     -> "prompt changed"
                 else                       -> "sliding window"
             }
@@ -132,15 +136,16 @@ class RagOrchestrator(
             // Release native KV-cache + decoder state of the previous conversation
             // before allocating a new one. Critical for LiteRT-LM (Gemma 4) — without
             // this the underlying native Conversation handle leaks every reset.
-            try { activeConversation?.close() } catch (e: Exception) {
+            try { conv?.close() } catch (e: Exception) {
                 Log.w(TAG, "previous conversation close: ${e.message}")
             }
-            activeConversation = modelRunner.createConversation(systemPrompt = prompt)
+            conv = modelRunner.createConversation(systemPrompt = prompt)
+            activeConversation = conv
             lastPromptHash = hash
             turnCount = 0
         }
         turnCount++
-        return activeConversation!!
+        return conv
     }
 
     /** Force-recreate the Conversation on the next query. Call when verbosity/language changes or memory is low. */
@@ -207,12 +212,39 @@ class RagOrchestrator(
      * Returns RagResult with metadata + LLM response flow.
      */
     suspend fun evaluate(query: String, ragMode: String = "Auto", deviceLat: Double? = null, deviceLon: Double? = null, radioMode: Boolean = false): RagResult {
-        // Per-turn mapMode toggle: NoMap suppresses LOCATION_JSON appendix entirely.
-        // Vision and training queries set ragMode=NoMap so the model doesn't try to
-        // place a map marker from the response.
-        mapModeOverride = if (ragMode == "NoMap") false else null
+        // Per-turn mapMode override:
+        //   "NoMap"     → suppress LOCATION_JSON appendix (training, marker-already-placed)
+        //   "VisionRag" → suppress appendix (vision queries) AND force RAG threshold (Siempre)
+        //   "Mapa"      → force appendix on this turn (user wants to mark, app couldn't pre-place)
+        //   anything else → null (use field default, which is now false)
+        mapModeOverride = when (ragMode) {
+            "NoMap", "VisionRag" -> false
+            "Mapa" -> true
+            else -> null
+        }
+        // VisionRag is a search-strategy alias for Siempre — vision queries are long/diluted
+        // by OCR boilerplate, so we accept low-similarity hits rather than skipping retrieval.
+        val effectiveRagMode = if (ragMode == "VisionRag") "Siempre" else ragMode
+        // For VisionRag, the caller (VisionAgent.buildMedicationQuery) prefixes the message
+        // with a clean "medication label: ..." line, separated from the full instruction
+        // wrapper by a blank line. Use ONLY that prefix for embedding so retrieval focuses
+        // on the drug-name tokens, not the verbose system instructions.
+        //
+        // For Auto/Siempre/Mapa: strip the app-injected [DEVICE GPS: ...] and
+        // [SESSION MARKERS — N] blocks so the embedding vector represents the user's
+        // actual question, not the GPS-coord boilerplate prefixed by buildQueryWithMarkers.
+        val retrievalQuery = if (ragMode == "VisionRag") {
+            query.substringBefore("\n\n").takeIf { it.isNotBlank() } ?: query
+        } else {
+            query
+                .replace(Regex("""\[DEVICE GPS:[^\]]*\]"""), "")
+                .replace(Regex("""\[SESSION MARKERS[^\n]*\n(?:\s*\d+\.[^\n]*\n?)+"""), "")
+                .trim()
+                .takeIf { it.isNotBlank() } ?: query
+        }
         val mode = if (embeddingEngine.isRealModeActive()) "ONNX" else "TEXT"
-        Log.d(TAG, "=== RAG evaluate [$mode mode] [ragMode: $ragMode] [radioMode: $radioMode]: '${query.take(80)}'")
+        Log.d(TAG, "=== RAG evaluate [$mode mode] [ragMode: $ragMode → $effectiveRagMode] [radioMode: $radioMode]: '${query.take(80)}'")
+        if (retrievalQuery !== query) Log.d(TAG, "Retrieval query split: '${retrievalQuery.take(80)}'")
 
         // RAG bypass: if the operator gave explicit coordinates in the query
         // (e.g., "marca lat 18.42 lon -69.43"), the model has everything it
@@ -220,31 +252,41 @@ class RagOrchestrator(
         // injects unrelated context (most KBs aren't full of lat/lon values)
         // and biases the response toward the wrong locale. Skip retrieval when
         // ragMode allows (Auto or Desactivado; Siempre still forces RAG).
-        val hasExplicitCoords = ragMode != "Siempre" && COORD_PATTERN.containsMatchIn(query)
+        //
+        // CRITICAL: MainActivity.buildQueryWithMarkers prepends `[DEVICE GPS: lat=X
+        // lon=Y]` and `[SESSION MARKERS — N]\n1. [V] ... lat=X lon=Y` blocks to every
+        // query. The COORD_PATTERN matches `lat=X lon=Y` style — so without stripping
+        // these app-injected blocks, every knowledge query gets bypassed and RAG
+        // never fires. Confirmed in logcat 2026-05-17 16:33 trace.
+        val userOnlyQuery = query
+            .replace(Regex("""\[DEVICE GPS:[^\]]*\]"""), "")
+            .replace(Regex("""\[SESSION MARKERS[^\n]*\n(?:\s*\d+\.[^\n]*\n?)+"""), "")
+            .trim()
+        val hasExplicitCoords = effectiveRagMode != "Siempre" && COORD_PATTERN.containsMatchIn(userOnlyQuery)
         if (hasExplicitCoords) {
-            Log.i(TAG, "RAG bypass: explicit lat/lon detected in query — skipping retrieval")
+            Log.i(TAG, "RAG bypass: explicit lat/lon detected in user query — skipping retrieval")
         }
 
         val searchResult: RagSearchResult = if (hasExplicitCoords) {
             RagSearchResult(false, -1.0, null, null, "")
-        } else if (ragMode == "Desactivado") {
+        } else if (effectiveRagMode == "Desactivado") {
             Log.d(TAG, "RAG Desactivado by user")
             RagSearchResult(false, -1.0, null, null, "")
         } else if (embeddingEngine.isRealModeActive()) {
-            val hybrid = hybridSearch(query, ragMode)
+            val hybrid = hybridSearch(retrievalQuery, effectiveRagMode)
             if (!hybrid.activated) {
                 // HNSW threshold exceeded — fall back to full-text BM25 over all chunks.
                 // Catches keyword-heavy queries (codes, proper nouns, exact terms) that
                 // semantic vectors miss when embeddings have low cosine similarity.
                 Log.d(TAG, "Hybrid RAG skipped (dist=${"%.3f".format(hybrid.score)}) — trying text fallback")
-                val text = textSearch(query, ragMode)
+                val text = textSearch(retrievalQuery, effectiveRagMode)
                 if (text.activated) {
                     Log.i(TAG, "Text fallback ACTIVATED: ${text.topTitle}")
                     text
                 } else hybrid
             } else hybrid
         } else {
-            textSearch(query, ragMode)
+            textSearch(retrievalQuery, effectiveRagMode)
         }
 
         val en = language == "en"
@@ -257,9 +299,9 @@ class RagOrchestrator(
             // QueryPreprocessor already pre-placed the marker — tell the model not to re-emit
             // LOCATION_JSON. Injected in the user message (not system prompt) so the Conversation
             // KV-cache is preserved and no context reset occurs.
-            if (ragMode == "NoMap") append(
-                if (en) "\n[SYSTEM NOTE: Marker already pre-placed by app. Do NOT emit LOCATION_JSON.]"
-                else    "\n[NOTA DE SISTEMA: Marcador ya colocado por la app. NO emitas LOCATION_JSON.]"
+            if (ragMode == "NoMap" || ragMode == "VisionRag") append(
+                if (en) "\n[SYSTEM NOTE: Do NOT emit LOCATION_JSON. Do NOT refuse based on missing geo info — answer the query directly.]"
+                else    "\n[NOTA DE SISTEMA: NO emitas LOCATION_JSON. NO te niegues por falta de info geográfica — responde directo.]"
             )
         }
 
@@ -293,10 +335,12 @@ class RagOrchestrator(
         val queryVector = embeddingEngine.generateVector(query)
 
         val searchResults = try {
+            // .use{} closes the native cursor when the lambda returns — without this,
+            // 50 sustained queries (eval path) exhaust ObjectBox's cursor pool.
             documentBox.query()
                 .nearestNeighbors(io.kognis.tactical.data.DocumentChunk_.vector, queryVector, 3)
                 .build()
-                .findWithScores()
+                .use { it.findWithScores() }
         } catch (e: Exception) {
             Log.e(TAG, "HNSW query failed", e)
             return RagSearchResult(false, -1.0, null, null, "")
@@ -313,7 +357,7 @@ class RagOrchestrator(
 
         val effectiveThreshold = when (ragMode) {
             "Siempre" -> 1.0 // Muy laxo para aceptar casi cualquier cosa
-            "Auto" -> 0.25 // Ligeramente más estricto para ignorar trivialidades
+            "Auto" -> 0.60   // Antes 0.25 — demasiado estricto; corpus e5-small da 0.30–0.45 en consultas reales
             else -> RELEVANCE_THRESHOLD
         }
 
@@ -358,10 +402,11 @@ class RagOrchestrator(
         val queryVector = embeddingEngine.generateVector(query)
 
         val rawResults = try {
+            // .use{} closes the native cursor when the lambda returns — see vectorSearch.
             documentBox.query()
                 .nearestNeighbors(io.kognis.tactical.data.DocumentChunk_.vector, queryVector, 50)
                 .build()
-                .findWithScores()
+                .use { it.findWithScores() }
         } catch (e: Exception) {
             Log.e(TAG, "HNSW query failed", e)
             return RagSearchResult(false, -1.0, null, null, "")
@@ -390,9 +435,14 @@ class RagOrchestrator(
         val topDist = candidates[topIdx].hnswDist
         val topDoc = candidates[topIdx].chunk
 
+        // multilingual-e5-small INSARAG/UNDAC corpus produces hnsw distances in 0.30–0.45
+        // range for real protocol queries (MARCH, START triage, LZ selection). Auto threshold
+        // 0.25 was too strict — skipped retrieval on the most common humanitarian queries.
+        // 0.60 fires on relevant chunks while still rejecting trivial noise (greetings,
+        // off-topic) which typically score > 0.7.
         val effectiveThreshold = when (ragMode) {
             "Siempre" -> 1.0
-            "Auto" -> 0.25
+            "Auto" -> 0.60
             else -> RELEVANCE_THRESHOLD
         }
 

@@ -230,12 +230,15 @@ class MainActivity : ComponentActivity() {
                 android.widget.Toast.makeText(this@MainActivity, "No text detected on label", android.widget.Toast.LENGTH_SHORT).show()
                 return@launch
             }
-            val query = io.kognis.tactical.core.agent.VisionAgent.buildMedicationQuery(ocr, en = true)
+            val mq = io.kognis.tactical.core.agent.VisionAgent.buildMedicationQuery(ocr, en = true)
             android.widget.Toast.makeText(this@MainActivity, "Extracted ${ocr.rawText.length} chars · querying RAG", android.widget.Toast.LENGTH_SHORT).show()
             this@MainActivity.isInGeneration.value = true
-            // ragMode "NoMap" suppresses the LOCATION_JSON appendix so vision queries
-            // never produce hallucinated map markers (perf log 2026-05-17 23:20:45 bug).
-            sendText(query, "NoMap")
+            // The full userMessage carries instructions for the LLM, but is prefixed with
+            // the clean "medication label:" line. RagOrchestrator strips everything after
+            // that line for embedding, keeping retrieval focused on the drug-name tokens.
+            // ragMode "VisionRag" → Siempre threshold + LOCATION_JSON appendix suppressed.
+            val combined = mq.embeddingQuery + "\n\n" + mq.userMessage
+            sendText(combined, "VisionRag")
         }
     }
 
@@ -802,6 +805,19 @@ class MainActivity : ComponentActivity() {
         refreshSessions()
     }
 
+    /** Wipe every stored chat session + title. Used by the drawer "Clear all chats" button. */
+    internal fun deleteAllSessions() {
+        val prefs = SecurePrefs.get(this)
+        val editor = prefs.edit()
+        prefs.all.keys
+            .filter { it.startsWith("session_") || it.startsWith("title_session_") || it == "chat_history" || it == "title_chat_history" }
+            .forEach { editor.remove(it) }
+        editor.apply()
+        currentChatId = "session_${System.currentTimeMillis()}"
+        chatMessageHistory.postValue(emptyList())
+        refreshSessions()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -967,8 +983,15 @@ class MainActivity : ComponentActivity() {
         val ttsAgentLocal = remember {
             io.kognis.tactical.core.agent.TtsAgent(this@MainActivity).also {
                 this@MainActivity.ttsAgent = it
+                // Seed initial locale from UI language so per-message 🔊 speaks the right
+                // language on first tap (without waiting for the toolbar TTS toggle).
+                it.setLanguage(en = (currentLanguage == "en"))
                 it.init()
             }
+        }
+        // Re-apply TTS locale whenever the UI language changes mid-session.
+        LaunchedEffect(currentLanguage) {
+            ttsAgentLocal.setLanguage(en = (currentLanguage == "en"))
         }
         DisposableEffect(ttsAgentLocal) { onDispose { ttsAgentLocal.shutdown() } }
         var ttsOn by remember { mutableStateOf(false) }
@@ -1860,9 +1883,31 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.padding(end = 64.dp)
                 ) {
                     Spacer(Modifier.height(32.dp))
+                    var drawerGearMenu by remember { mutableStateOf(false) }
+                    var showClearAllDialog by remember { mutableStateOf(false) }
                     Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text(stringResource(R.string.quick_history), color = io.kognis.tactical.ui.theme.RescueAmber, style = MaterialTheme.typography.titleMedium)
-                        IconButton(onClick = { showLanguageDialog = true }) { Icon(Icons.Default.Settings, "Language", tint=androidx.compose.ui.graphics.Color.Gray) }
+                        Box {
+                            IconButton(onClick = { drawerGearMenu = true }) { Icon(Icons.Default.Settings, "Settings", tint=androidx.compose.ui.graphics.Color.Gray) }
+                            androidx.compose.material3.DropdownMenu(
+                                expanded = drawerGearMenu,
+                                onDismissRequest = { drawerGearMenu = false },
+                            ) {
+                                androidx.compose.material3.DropdownMenuItem(
+                                    text = { Text(if (currentLanguage == "en") "Language…" else "Idioma…") },
+                                    onClick = { drawerGearMenu = false; showLanguageDialog = true },
+                                )
+                                androidx.compose.material3.DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            if (currentLanguage == "en") "Clear all chats" else "Borrar todos los chats",
+                                            color = androidx.compose.ui.graphics.Color(0xFFE57373),
+                                        )
+                                    },
+                                    onClick = { drawerGearMenu = false; showClearAllDialog = true },
+                                )
+                            }
+                        }
                     }
                     Divider(color = androidx.compose.ui.graphics.Color.DarkGray)
                     
@@ -1870,7 +1915,13 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                         onClick = {
                             scope.launch { drawerState.close() }
-                            this@MainActivity.fieldCore?.cancelGeneration()
+                            val core = this@MainActivity.fieldCore
+                            core?.cancelGeneration()
+                            // End any active training session and clear LiteRT Conversation
+                            // (KV cache) so the new chat starts fresh — without this, old
+                            // turns and training prompts bleed into the new chat's responses.
+                            runCatching { if (isTrainingActive()) core?.endLearningSession() }
+                            runCatching { core?.clearConversation() }
                             this@MainActivity.currentChatId = "session_${System.currentTimeMillis()}"
                             this@MainActivity.chatMessageHistory.value = emptyList()
                             this@MainActivity.saveChatHistory(emptyList())
@@ -1878,6 +1929,32 @@ class MainActivity : ComponentActivity() {
                         }
                     ) {
                         Text(stringResource(R.string.new_chat), color = io.kognis.tactical.ui.theme.RescueAmber)
+                    }
+
+                    // "Clear all chats" lives in the gear-icon dropdown above (kept away from
+                    // the "New Chat" tap target so it can't be triggered accidentally).
+                    if (showClearAllDialog) {
+                        androidx.compose.material3.AlertDialog(
+                            onDismissRequest = { showClearAllDialog = false },
+                            confirmButton = {
+                                androidx.compose.material3.TextButton(onClick = {
+                                    showClearAllDialog = false
+                                    scope.launch { drawerState.close() }
+                                    val core = this@MainActivity.fieldCore
+                                    core?.cancelGeneration()
+                                    runCatching { if (isTrainingActive()) core?.endLearningSession() }
+                                    runCatching { core?.clearConversation() }
+                                    this@MainActivity.deleteAllSessions()
+                                }) { Text(if (currentLanguage == "en") "Delete all" else "Borrar todo", color = androidx.compose.ui.graphics.Color(0xFFE57373)) }
+                            },
+                            dismissButton = {
+                                androidx.compose.material3.TextButton(onClick = { showClearAllDialog = false }) {
+                                    Text(if (currentLanguage == "en") "Cancel" else "Cancelar", color = io.kognis.tactical.ui.theme.RescueAmber)
+                                }
+                            },
+                            title = { Text(if (currentLanguage == "en") "Clear all chats?" else "¿Borrar todos los chats?") },
+                            text = { Text(if (currentLanguage == "en") "This wipes every stored session. Cannot be undone." else "Borra todas las sesiones guardadas. No se puede deshacer.") },
+                        )
                     }
 
                     androidx.compose.foundation.lazy.LazyColumn(modifier = Modifier.weight(1f)) {
@@ -2573,10 +2650,17 @@ class MainActivity : ComponentActivity() {
         val trainingActive = isTrainingActive()
         var effectiveRagMode = if (trainingActive) "Siempre" else ragMode
         if (trainingActive) {
+            // Render the user's message in the chat history — the training short-circuit
+            // previously skipped appendUserMessage so only assistant replies showed up.
+            appendUserMessage(input)
+            isInGeneration.value = true
+            pendingRagInfo = null
+            querySentMs = System.currentTimeMillis()
             val query = input  // raw — no buildQueryWithMarkers, no QueryPreprocessor side-effects
             fieldCore?.sendQuery(query, effectiveRagMode)
             return
         }
+        var markerPlaced: io.kognis.tactical.core.map.MarkerStore.Entry? = null
         if (!isEval) {
             val prep = io.kognis.tactical.core.map.QueryPreprocessor.preprocess(input)
             when {
@@ -2585,17 +2669,15 @@ class MainActivity : ComponentActivity() {
                     val m = prep.markerIntent
                     val cotType = runCatching { io.kognis.tactical.core.map.MarkerStore.CotType.valueOf(m.cotTypeName) }
                         .getOrDefault(io.kognis.tactical.core.map.MarkerStore.CotType.COMMAND)
-                    io.kognis.tactical.core.map.MarkerStore.add(
-                        io.kognis.tactical.core.map.MarkerStore.Entry(
-                            location = io.kognis.tactical.core.map.LocationJsonExtractor.Location(
-                                lat = m.lat, lon = m.lon, label = m.label, markerType = m.cotTypeName
-                            ),
-                            source = io.kognis.tactical.core.map.MarkerStore.Source.OSMDROID,
-                            cotType = cotType,
-                        )
+                    val entry = io.kognis.tactical.core.map.MarkerStore.Entry(
+                        location = io.kognis.tactical.core.map.LocationJsonExtractor.Location(
+                            lat = m.lat, lon = m.lon, label = m.label, markerType = m.cotTypeName
+                        ),
+                        source = io.kognis.tactical.core.map.MarkerStore.Source.OSMDROID,
+                        cotType = cotType,
                     )
-                    // Tell LLM not to emit LOCATION_JSON (marker already placed correctly)
-                    effectiveRagMode = "NoMap"
+                    io.kognis.tactical.core.map.MarkerStore.add(entry)
+                    markerPlaced = entry
                 }
                 prep.gpsIntent != null -> {
                     // GPS marking: use device location
@@ -2604,19 +2686,39 @@ class MainActivity : ComponentActivity() {
                         val g = prep.gpsIntent
                         val cotType = runCatching { io.kognis.tactical.core.map.MarkerStore.CotType.valueOf(g.cotTypeName) }
                             .getOrDefault(io.kognis.tactical.core.map.MarkerStore.CotType.COMMAND)
-                        io.kognis.tactical.core.map.MarkerStore.add(
-                            io.kognis.tactical.core.map.MarkerStore.Entry(
-                                location = io.kognis.tactical.core.map.LocationJsonExtractor.Location(
-                                    lat = gps.first, lon = gps.second, label = g.label, markerType = g.cotTypeName
-                                ),
-                                source = io.kognis.tactical.core.map.MarkerStore.Source.OSMDROID,
-                                cotType = cotType,
-                            )
+                        val entry = io.kognis.tactical.core.map.MarkerStore.Entry(
+                            location = io.kognis.tactical.core.map.LocationJsonExtractor.Location(
+                                lat = gps.first, lon = gps.second, label = g.label, markerType = g.cotTypeName
+                            ),
+                            source = io.kognis.tactical.core.map.MarkerStore.Source.OSMDROID,
+                            cotType = cotType,
                         )
-                        effectiveRagMode = "NoMap"
+                        io.kognis.tactical.core.map.MarkerStore.add(entry)
+                        markerPlaced = entry
+                    } else {
+                        // Marking intent but no GPS fix yet — let the LLM ack and prompt user
+                        effectiveRagMode = "Mapa"
                     }
                 }
+                prep.isMarkingCommand -> {
+                    // User wants to mark but didn't provide coords or GPS phrase — let LLM handle it
+                    effectiveRagMode = "Mapa"
+                }
             }
+        }
+        // When QueryPreprocessor placed the marker deterministically, skip the LLM entirely:
+        // synthesize a friendly confirmation. Saves a model call, avoids "no info" refusals,
+        // and gives the operator instant feedback that the marker is on the map.
+        if (markerPlaced != null) {
+            appendUserMessage(input)
+            val en = (io.kognis.tactical.core.SecurePrefs.get(this).getString("app_language", "es") ?: "es") == "en"
+            val loc = markerPlaced.location
+            val confirm = if (en)
+                "Done. Marker placed: ${loc.label} (${markerPlaced.cotType.symbol}) at ${"%.5f".format(loc.lat)}, ${"%.5f".format(loc.lon)}."
+            else
+                "Listo. Marcador colocado: ${loc.label} (${markerPlaced.cotType.symbol}) en ${"%.5f".format(loc.lat)}, ${"%.5f".format(loc.lon)}."
+            appendSyntheticAssistantMessage(confirm)
+            return
         }
         appendUserMessage(input)
         isInGeneration.value = true
@@ -2712,6 +2814,18 @@ class MainActivity : ComponentActivity() {
         val updatedList = chatMessageHistoryValue + newMessage
         chatMessageHistory.value = updatedList
         saveChatHistory(updatedList)
+    }
+
+    /**
+     * Append a fully-formed assistant message without going through the LLM.
+     * Used when QueryPreprocessor handles a request deterministically (e.g. marker placement)
+     * and the model would only add latency.
+     */
+    private fun appendSyntheticAssistantMessage(content: String) {
+        val history = (chatMessageHistory.value ?: listOf()).toMutableList()
+        history.add(ChatMessageDisplayItem(role = "ASSISTANT", text = content))
+        chatMessageHistory.value = history
+        saveChatHistory(history)
     }
 
     /**

@@ -251,7 +251,7 @@ fun AssistantMessage(
                             .clickable {
                                 runCatching {
                                     val act = context as? io.kognis.tactical.MainActivity
-                                    act?.ttsAgent?.speak(displayText)
+                                    act?.ttsAgent?.toggleSpeak(displayText)
                                 }
                             }
                             .padding(4.dp)

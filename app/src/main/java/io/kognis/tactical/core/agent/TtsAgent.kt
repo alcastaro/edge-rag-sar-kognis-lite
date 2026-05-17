@@ -28,6 +28,8 @@ class TtsAgent(private val context: Context) {
         private set
     @Volatile var lastError: String? = null
         private set
+    @Volatile var isSpeaking: Boolean = false
+        private set
     @Volatile private var pendingLocale: Locale = Locale("es", "ES")
 
     fun init(onReady: (Boolean) -> Unit = {}) {
@@ -40,10 +42,10 @@ class TtsAgent(private val context: Context) {
                     tts?.setLanguage(Locale.US)
                 }
                 tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                    override fun onStart(id: String?) {}
-                    override fun onDone(id: String?) {}
+                    override fun onStart(id: String?) { isSpeaking = true }
+                    override fun onDone(id: String?) { isSpeaking = false }
                     @Deprecated("Deprecated in Java")
-                    override fun onError(id: String?) {}
+                    override fun onError(id: String?) { isSpeaking = false }
                 })
                 ready = true
                 Log.i(TAG, "TTS ready (locale=$pendingLocale)")
@@ -79,6 +81,12 @@ class TtsAgent(private val context: Context) {
 
     fun stop() {
         runCatching { tts?.stop() }
+        isSpeaking = false
+    }
+
+    /** Toggle: if currently speaking, stop. Otherwise speak [text]. */
+    fun toggleSpeak(text: String) {
+        if (isSpeaking) stop() else speak(text)
     }
 
     fun shutdown() {

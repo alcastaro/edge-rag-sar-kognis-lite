@@ -76,8 +76,14 @@ class FieldAssistantService : Service() {
             if (query == null) return
             val mode = ragMode ?: "Auto"
             Log.d(TAG, "sendQuery: $query (mode: $mode)")
-            queryJob?.cancel()
+            // Snapshot the previous job and join it inside the new coroutine so the
+            // old generation finishes its decoder pass before the new one allocates a
+            // Conversation. Without this, two coroutines briefly share the LiteRT
+            // native handle and the second one's response truncates to `" }"` —
+            // the corruption pattern observed in the 2026-05-17 perf log.
+            val previous = queryJob
             queryJob = serviceScope.launch {
+                previous?.cancelAndJoin()
                 try {
                     val orchestrator = ragOrchestrator
                     if (orchestrator == null) {
@@ -107,10 +113,14 @@ class FieldAssistantService : Service() {
                             else -> currentLang   // tie → app pref
                         }
                         Log.d(TAG, "Training language detected: $perTurnLang (sp=$spCount en=$enCount)")
-                        learning!!.setLanguage(perTurnLang)
+                        // Snapshot the orchestrator into a non-null local — endLearningSession()
+                        // from a parallel AIDL call can null `learningOrchestrator` between the
+                        // training-active check above and these calls.
+                        val learningSnap = learning
+                        learningSnap?.setLanguage(perTurnLang)
                         orchestrator.language = perTurnLang
-                        orchestrator.customSystemPrompt = learning.systemPromptForActiveSession(perTurnLang)
-                        learning.appendUserTurn(query)
+                        orchestrator.customSystemPrompt = learningSnap?.systemPromptForActiveSession(perTurnLang)
+                        learningSnap?.appendUserTurn(query)
                         learningBuffer.clear()
                         // Force RAG ON during training — corpus is the authoritative source
                         // for SAR protocols. Auto/NoMap can cause empty retrieval.
@@ -480,7 +490,11 @@ class FieldAssistantService : Service() {
                 orch.language = SecurePrefs.get(this).getString("app_language", "es") ?: "es"
                 orch.modelSize = "E2B"
                 orch.maxTurns = 8
-                orch.mapMode = true
+                // mapMode is OFF by default. The model emits LOCATION_JSON only when the
+                // user explicitly asks to mark a location and QueryPreprocessor could not
+                // pre-place the marker (handled per-turn via ragMode="Mapa"). Knowledge
+                // queries and casual greetings no longer drop spurious markers.
+                orch.mapMode = false
                 orch.onSlidingWindowReset = { turns, max ->
                     safeCallback { it.onStatusChange("CONTEXT_RESET:$turns/$max") }
                 }
