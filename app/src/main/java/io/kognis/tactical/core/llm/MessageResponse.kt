@@ -1,6 +1,6 @@
 package io.kognis.tactical.core.llm
 
-/** Drop-in replacement for ai.liquid.leap.message.MessageResponse */
+/** Streamed message response chunk emitted by a Conversation. */
 sealed class MessageResponse {
     data class Chunk(val text: String) : MessageResponse()
 }

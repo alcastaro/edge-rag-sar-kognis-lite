@@ -1,6 +1,6 @@
 package io.kognis.tactical.core.llm
 
-/** Drop-in replacement for ai.liquid.leap.message.ChatMessage */
+/** Chat message wrapper for streaming LLM runtimes. */
 data class ChatMessage(
     val role: Role,
     val textContent: String,

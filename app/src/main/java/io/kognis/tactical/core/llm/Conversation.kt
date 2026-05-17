@@ -2,7 +2,7 @@ package io.kognis.tactical.core.llm
 
 import kotlinx.coroutines.flow.Flow
 
-/** Drop-in replacement for ai.liquid.leap.Conversation */
+/** Conversation interface for streaming LLM runtimes. */
 interface Conversation {
     fun generateResponse(message: ChatMessage): Flow<MessageResponse>
 

@@ -49,6 +49,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MicOff
+import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -135,6 +138,19 @@ class MainActivity : ComponentActivity() {
         // Persist URI permission so the service (different process) can read it
         contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
         fieldCore?.updateKnowledgeBase(uri.toString())
+    }
+
+    // Pending action when RECORD_AUDIO permission is requested mid-flow. Invoked
+    // on permission result so the user only taps the mic button once.
+    @Volatile private var pendingMicAction: (() -> Unit)? = null
+
+    private val micPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        val action = pendingMicAction
+        pendingMicAction = null
+        if (granted) action?.invoke()
+        else android.widget.Toast.makeText(this, "Mic permission denied", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     private val markerImportLauncher = registerForActivityResult(
@@ -724,6 +740,16 @@ class MainActivity : ComponentActivity() {
         var evalTotal by remember { mutableStateOf(0) }
         var evalCurrentQ by remember { mutableStateOf("") }
         var evalJob by remember { mutableStateOf<Job?>(null) }
+        var gisRunning by remember { mutableStateOf(false) }
+        var gisProgress by remember { mutableStateOf(0) }
+        var gisTotal by remember { mutableStateOf(0) }
+        var gisJob by remember { mutableStateOf<Job?>(null) }
+        // Voice input agent state — on-device speech-to-text (SpeechRecognizer)
+        var voiceListening by remember { mutableStateOf(false) }
+        var voiceError by remember { mutableStateOf<String?>(null) }
+        val voiceAgent = remember { io.kognis.tactical.core.agent.VoiceInputAgent(this@MainActivity) }
+        // Flashlight tool state
+        var flashlightOn by remember { mutableStateOf(io.kognis.tactical.core.agent.FlashlightTool.isOn) }
         var showObservabilityModal by remember { mutableStateOf(false) }
         var showPerfDashboard by remember { mutableStateOf(false) }
         
@@ -1147,6 +1173,81 @@ class MainActivity : ComponentActivity() {
                             )
                             Text(
                                 "50 questions · exports JSON",
+                                color = androidx.compose.ui.graphics.Color.Gray,
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                        }
+                    }
+
+                    // GIS mapping test
+                    val gisReady = isReady && !gisRunning && !evalRunning
+                    Row(
+                        Modifier.padding(vertical = 12.dp).fillMaxWidth().clickable(enabled = gisReady) {
+                            showSettingsMenu = false
+                            val questions = io.kognis.tactical.core.GisEvalRunner.loadQuestions(ctx)
+                            gisTotal = questions.size
+                            gisProgress = 0
+                            gisRunning = true
+                            val results = mutableListOf<io.kognis.tactical.core.GisEvalRunner.GisResult>()
+                            gisJob = lifecycleScope.launch {
+                                for ((idx, q) in questions.withIndex()) {
+                                    gisProgress = idx + 1
+                                    fieldCore?.clearConversation()
+                                    delay(800L)
+                                    val markersBefore = io.kognis.tactical.core.map.MarkerStore.markers.size
+                                    val start = System.currentTimeMillis()
+                                    this@MainActivity.evalBuffer.clear()
+                                    this@MainActivity.evalDeferred = CompletableDeferred()
+                                    // isEval=false → QueryPreprocessor fires → places marker with exact coords or GPS
+                                    sendText(q.question, "Auto", isEval = false)
+                                    val llmResp = withTimeoutOrNull(60_000L) {
+                                        this@MainActivity.evalDeferred!!.await()
+                                    } ?: "TIMEOUT"
+                                    this@MainActivity.evalDeferred = null
+                                    val dur = System.currentTimeMillis() - start
+                                    // Inspect what was placed
+                                    val markersAfter = io.kognis.tactical.core.map.MarkerStore.markers
+                                    val placed = markersAfter.size > markersBefore
+                                    val newMarker = if (placed) markersAfter.last() else null
+                                    results += io.kognis.tactical.core.GisEvalRunner.GisResult(
+                                        id = q.id,
+                                        question = q.question,
+                                        markerPlaced = placed,
+                                        lat = newMarker?.location?.lat,
+                                        lon = newMarker?.location?.lon,
+                                        label = newMarker?.location?.label,
+                                        cotType = newMarker?.cotType?.name,
+                                        gpsUsed = q.isGpsBased,
+                                        llmResponse = llmResp.trim(),
+                                        durationMs = dur,
+                                        timedOut = llmResp == "TIMEOUT",
+                                    )
+                                    delay(400L)
+                                }
+                                gisRunning = false
+                                val uri = io.kognis.tactical.core.GisEvalRunner.exportResults(ctx, results)
+                                if (uri != null) {
+                                    ctx.startActivity(
+                                        android.content.Intent.createChooser(
+                                            io.kognis.tactical.core.GisEvalRunner.shareIntent(uri),
+                                            "Share GIS test results"
+                                        )
+                                    )
+                                }
+                            }
+                        },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(Icons.Default.Map, null, tint = if (gisReady) io.kognis.tactical.ui.theme.RescueAmber else androidx.compose.ui.graphics.Color.Gray)
+                        Spacer(Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                if (gisRunning) "GIS test ($gisProgress/${gisTotal})…" else "Run GIS Map Test",
+                                color = if (gisReady) androidx.compose.ui.graphics.Color.White else androidx.compose.ui.graphics.Color.Gray,
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                            Text(
+                                "13 markers (10 coord + 3 GPS) · exports JSON",
                                 color = androidx.compose.ui.graphics.Color.Gray,
                                 style = MaterialTheme.typography.labelSmall,
                             )
@@ -1744,6 +1845,64 @@ class MainActivity : ComponentActivity() {
                                                     }
                                                 }
                                                 
+                                                // Flashlight tool — agentic field utility (signaling, dark conditions)
+                                                val flashAvailable = remember { io.kognis.tactical.core.agent.FlashlightTool.isAvailable(this@MainActivity) }
+                                                if (flashAvailable) {
+                                                    IconButton(onClick = {
+                                                        flashlightOn = io.kognis.tactical.core.agent.FlashlightTool.toggle(this@MainActivity)
+                                                    }) {
+                                                        Icon(
+                                                            if (flashlightOn) Icons.Default.FlashOn else Icons.Default.FlashOff,
+                                                            contentDescription = "Flashlight",
+                                                            tint = if (flashlightOn) io.kognis.tactical.ui.theme.RescueAmber else androidx.compose.ui.graphics.Color.LightGray,
+                                                        )
+                                                    }
+                                                }
+
+                                                // Voice input agent — on-device speech-to-text → existing pipeline
+                                                if (voiceAgent.isAvailable()) {
+                                                    IconButton(onClick = {
+                                                        if (voiceListening) {
+                                                            voiceAgent.stop()
+                                                            voiceListening = false
+                                                            return@IconButton
+                                                        }
+                                                        val start: () -> Unit = {
+                                                            voiceError = null
+                                                            voiceAgent.setLanguage(en = (currentLanguage == "en"))
+                                                            voiceListening = true
+                                                            voiceAgent.start(
+                                                                onPartial = { partial -> userInputFieldText = partial },
+                                                                onFinal = { final ->
+                                                                    voiceListening = false
+                                                                    userInputFieldText = final
+                                                                    // Auto-send when transcript is non-empty
+                                                                    if (final.isNotBlank() && (isReady || llmLoaded)) {
+                                                                        this@MainActivity.isInGeneration.value = true
+                                                                        sendText(final, currentRagMode)
+                                                                        userInputFieldText = ""
+                                                                    }
+                                                                },
+                                                                onError = { code ->
+                                                                    voiceListening = false
+                                                                    voiceError = io.kognis.tactical.core.agent.VoiceInputAgent.errorMessage(code, currentLanguage == "en")
+                                                                },
+                                                            )
+                                                        }
+                                                        val granted = androidx.core.content.ContextCompat.checkSelfPermission(
+                                                            this@MainActivity, android.Manifest.permission.RECORD_AUDIO
+                                                        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                                                        if (granted) start()
+                                                        else { pendingMicAction = start; micPermissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO) }
+                                                    }) {
+                                                        Icon(
+                                                            if (voiceListening) Icons.Default.MicOff else Icons.Default.Mic,
+                                                            contentDescription = if (voiceListening) "Stop voice" else "Voice input",
+                                                            tint = if (voiceListening) androidx.compose.ui.graphics.Color.Red else io.kognis.tactical.ui.theme.RescueAmber,
+                                                        )
+                                                    }
+                                                }
+
                                                 if (isInGeneration.value) {
                                                     IconButton(onClick = { fieldCore?.cancelGeneration() }) { Icon(Icons.Default.Close, contentDescription = "Stop", tint = androidx.compose.ui.graphics.Color.Red) }
                                                 } else {
@@ -1832,6 +1991,46 @@ class MainActivity : ComponentActivity() {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = "Cancel eval",
+                                tint = androidx.compose.ui.graphics.Color.Gray,
+                                modifier = Modifier.size(14.dp),
+                            )
+                        }
+                    }
+                }
+
+                // GIS test progress bar
+                if (gisRunning) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(androidx.compose.ui.graphics.Color(0xFF0D1A0D))
+                            .padding(horizontal = 16.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        androidx.compose.material3.LinearProgressIndicator(
+                            progress = { if (gisTotal > 0) gisProgress.toFloat() / gisTotal else 0f },
+                            color = androidx.compose.ui.graphics.Color(0xFF2E7D32),
+                            trackColor = androidx.compose.ui.graphics.Color.DarkGray,
+                            modifier = Modifier.weight(1f).height(3.dp),
+                        )
+                        Text(
+                            "GIS $gisProgress/$gisTotal",
+                            color = androidx.compose.ui.graphics.Color(0xFF66BB6A),
+                            fontSize = 10.sp,
+                        )
+                        androidx.compose.material3.IconButton(
+                            onClick = {
+                                gisJob?.cancel()
+                                gisJob = null
+                                this@MainActivity.evalDeferred = null
+                                gisRunning = false
+                            },
+                            modifier = Modifier.size(24.dp),
+                        ) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Cancel GIS test",
                                 tint = androidx.compose.ui.graphics.Color.Gray,
                                 modifier = Modifier.size(14.dp),
                             )
@@ -2039,7 +2238,7 @@ class MainActivity : ComponentActivity() {
      * Load displayed chat history from the instance state bundle.
      */
     private fun loadState(state: Bundle) {
-        // State loading delegated to Sovereign Core in the future
+        // State loading delegated to FieldAssistantService in the future
     }
 
     /**

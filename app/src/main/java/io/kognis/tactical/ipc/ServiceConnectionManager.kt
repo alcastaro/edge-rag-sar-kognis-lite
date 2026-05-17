@@ -11,7 +11,7 @@ import io.kognis.tactical.core.IFieldCore
 import io.kognis.tactical.core.FieldAssistantService
 
 /**
- * CQ-01 extract: manages AIDL bind/unbind lifecycle for SovereignCoreService.
+ * Manages AIDL bind/unbind lifecycle for FieldAssistantService.
  * Separates service plumbing from Activity UI code.
  */
 class ServiceConnectionManager(

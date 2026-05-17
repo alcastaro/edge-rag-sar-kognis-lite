@@ -7,7 +7,7 @@ _Last updated: 2026-05-16 (Session S17) — Gemma 4 Good Hackathon (deadline May
 
 ### F10: SAR marker types
 **Files:** `MarkerStore.kt`, `AssistantMessage.kt`, `MapFallbackView.kt`, `JsonMarkerExporter.kt`
-- Replaced military CoT enum with 8 INSARAG-aligned SAR types:
+- Replaced previous marker types with 8 INSARAG-aligned SAR types:
   - VICTIM (V, red), MEDICAL (+ dark red), HAZARD (! amber), COMMAND (C, blue)
   - EXTRACTION (X, green), MISSING (M, orange), BASE (B, brown), WATER (W, light blue)
 - Each marker rendered as a circle with letter/symbol drawn in center via Canvas API
@@ -169,7 +169,7 @@ MARKER OUTPUT RULES (strict):
 
 ### HIGH priority (2–4 hours)
 - [ ] **Tile pre-cache for demo region** — script to pre-populate osmdroid cache so map shows tiles not gray squares in video
-  - Location: Santo Domingo approx 18.44–18.50°N, 69.90–69.95°W, zoom 12–17
+  - Location: demo region, zoom 12–17
 - [ ] **GitHub public push** — verify gitignore excludes private corpus; push `kognis-lite` branch
 
 ### MEDIUM (if time allows)
@@ -201,7 +201,7 @@ QueryPreprocessor:   coordinate extraction + GPS marking active
 EvalRunner:          50-question eval (30 multi-chunk + 20 hallucination); exports kognis_eval_*.json
 ```
 - KB_VERSION = 6 (stable, no re-ingest on next launch)
-- SAR marker types: 8 INSARAG-aligned types (replaces 6 CoT types from S16)
+- SAR marker types: 8 INSARAG-aligned types (replaces 6 previous marker types from S16)
 - LOCATION_JSON: now carries optional `"type"` field for SAR marker routing
 - Eval results (S17): rag_hit_rate=0.96, hallucination_resistance=100%, avg_tps=14.1 tok/s (thermal-throttled), peak_temp=75.9°C
 - APK: `app/build/outputs/apk/debug/app-debug.apk` — installed on S24 Ultra
@@ -229,7 +229,7 @@ EvalRunner:          50-question eval (30 multi-chunk + 20 hallucination); expor
 - [x] JSON marker export/import (WhatsApp sharing)
 - [x] Session markers injected as RAG context with distances
 - [x] RAG audit: tappable source metadata (manual, page, chunk #)
-- [x] CoT marker types (6 types with colored map icons) — S16
+- [x] Marker types (6 types with colored map icons) — S16
 - [x] Send button always visible
 - [x] Gear menu consolidates all actions
 - [x] My Location button on inline map

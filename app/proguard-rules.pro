@@ -19,15 +19,6 @@
 # --- ONNX Runtime ---
 -keep class ai.onnxruntime.** { *; }
 
-# --- LEAP SDK ---
--keep class ai.liquid.leap.** { *; }
-
-# --- llama.cpp JNI bindings (S21) ---
-# Native methods + class loaded by System.loadLibrary("kognis_llm")
--keepclasseswithmembers class * { native <methods>; }
--keepclasseswithmembernames class io.kognis.tactical.core.llm.** { *; }
--keep class io.kognis.tactical.core.llm.LlamaJni { *; }
-
 # --- Kotlinx Serialization ---
 -keepattributes *Annotation*, InnerClasses
 -dontnote kotlinx.serialization.AnnotationsKt

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Smoke test: install APK, launch, capture logcat for LlamaJni init.
+# Kognis Lite smoke test: install APK, launch, capture logcat for model init.
 set -e
 
 PKG=io.kognis.tactical
@@ -21,7 +21,7 @@ adb shell am start -n $PKG/.MainActivity
 
 echo "=== capture logcat 60s ==="
 timeout 60 adb logcat -v time \
-  LlamaJni:V SovereignCore:V LlamaModelRunner:V kognis:V \
+  FieldAssistantService:V RagOrchestrator:V LiteRtModelRunner:V kognis:V \
   AndroidRuntime:E *:S | tee "$LOG" || true
 
 echo ""

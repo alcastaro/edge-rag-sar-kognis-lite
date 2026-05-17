@@ -1,6 +1,6 @@
 package io.kognis.tactical.core.llm
 
-/** Drop-in replacement for ai.liquid.leap.ModelRunner */
+/** Model runner abstraction for streaming LLM backends. */
 interface ModelRunner {
     fun createConversation(systemPrompt: String): Conversation
     fun unload()

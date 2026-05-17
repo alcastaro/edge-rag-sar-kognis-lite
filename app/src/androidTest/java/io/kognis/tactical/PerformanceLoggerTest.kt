@@ -41,7 +41,7 @@ class PerformanceLoggerTest {
         tokensPerSec: Double = 5.0,
         durationMs: Long = 1000L,
         tokens: Int = 50,
-        model: String = "LFM2-350M",
+        model: String = "Gemma-4-E2B",
         tempCelsius: Double? = 35.0,
         responseText: String = "test response",
         chunkTitle: String = "Test Chunk",

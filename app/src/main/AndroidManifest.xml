@@ -9,6 +9,20 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Voice input agent: on-device SpeechRecognizer for field hands-free operation -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- Flashlight tool: signaling + dark-conditions SAR work -->
+    <uses-permission android:name="android.permission.FLASHLIGHT"/>
+
+    <!-- Android 11+ visibility for SpeechRecognizer service -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <package android:name="com.google.android.apps.maps" />
+        <package android:name="net.osmand.plus" />
+        <package android:name="net.osmand" />
+    </queries>
 
     <application
         android:name=".KognisLiteApp"

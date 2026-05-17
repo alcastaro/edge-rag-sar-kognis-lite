@@ -179,7 +179,7 @@
       "chunks": [
         {
           "title": "1823826E_web_pages.pdf",
-          "content": "P: How should the UCC handle priority setting between INSARAG methodology and LEMA directives?\nThe USAR community operates based on a triage scale of survivability, prioritizing missions where there is the highest probability of saving lives. However, the LEMA may have broader political, social, or strategic reasons for assigning priorities that deviate from this technical concept. In these situations, USAR teams are required to work as directed by the LEMA. Despite this requirement for compliance, USAR teams should actively advocate for the utilization of standard INSARAG methodology. The UCC plays a vital role here by acting as the intermediary to ensure that the LEMA understands the technical rationale behind the survivability-based approach, while ensuring that all operational activities remain fully integrated within the host nation's command structure. The ultimate goal is to balance professional rescue standards with the sovereign authority and the specific priority needs of the affected country's government.",
+          "content": "P: How should the UCC handle priority setting between INSARAG methodology and LEMA directives?\nThe USAR community operates based on a triage scale of survivability, prioritizing missions where there is the highest probability of saving lives. However, the LEMA may have broader political, social, or strategic reasons for assigning priorities that deviate from this technical concept. In these situations, USAR teams are required to work as directed by the LEMA. Despite this requirement for compliance, USAR teams should actively advocate for the utilization of standard INSARAG methodology. The UCC plays a vital role here by acting as the intermediary to ensure that the LEMA understands the technical rationale behind the survivability-based approach, while ensuring that all operational activities remain fully integrated within the host nation's command structure. The ultimate goal is to balance professional rescue standards with the host-nation authority and the specific priority needs of the affected country's government.",
           "score": 0.2047,
           "source_page": "197"
         },
@@ -196,7 +196,7 @@
           "source_page": "75"
         }
       ],
-      "response": "The USAR team should work as directed by the LEMA, but should advocate for the use of the INSARAG methodology. The UCC must act as an intermediary to ensure the LEMA understands the technical rationale behind the survivability-based approach. The goal is to balance professional rescue standards with the sovereign authority and specific priority needs of the affected country's government.\nLOCATION_JSON: {\"lat\": 18.448527, \"lon\": -69.941771, \"label\": \"No coordinates provided\"}"
+      "response": "The USAR team should work as directed by the LEMA, but should advocate for the use of the INSARAG methodology. The UCC must act as an intermediary to ensure the LEMA understands the technical rationale behind the survivability-based approach. The goal is to balance professional rescue standards with the host-nation authority and specific priority needs of the affected country's government.\nLOCATION_JSON: {\"lat\": 18.448527, \"lon\": -69.941771, \"label\": \"No coordinates provided\"}"
     },
     {
       "ts": "20:54:40",

@@ -53,7 +53,6 @@ cp corpus/dist/manuales_base_v6.json app/src/main/assets/manuales_base.json
 4. Bump `KB_VERSION` in `app/src/main/java/io/kognis/tactical/data/KnowledgeBaseLoader.kt`
 5. Build and deploy — ObjectBox wipes and re-ingests automatically on first launch
 
-## Security
+## Scope
 
-- **Public corpus only** in this repo. No Colombia-specific or sovereign-reference content.
-- `manuales_base_v1.json` (9,794 chunks, 54 docs) lives in the private `Kognis-app` repo only.
+- **Public corpus only** in this repo. Private/extended corpora are not included in this repository.

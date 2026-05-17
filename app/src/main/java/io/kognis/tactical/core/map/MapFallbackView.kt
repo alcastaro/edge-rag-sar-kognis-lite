@@ -2,7 +2,10 @@ package io.kognis.tactical.core.map
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.location.Location
+import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Bundle
 import android.preference.PreferenceManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -14,12 +17,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +36,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -98,7 +105,13 @@ fun MapFallbackViewMulti(
     onMarkMyLocation: ((lat: Double, lon: Double) -> Unit)? = null,
 ) {
     val context = LocalContext.current
-    val deviceLatLon = remember { lastKnownLatLon(context) }
+    // Live GPS — updates continuously via LocationListener (see DisposableEffect below).
+    // Initial seed = last known fix so bounding box / centering work without waiting.
+    var liveGps by remember { mutableStateOf(lastKnownLatLon(context)) }
+    var isTracking by remember { mutableStateOf(false) }
+    val deviceLatLon = liveGps
+    // Tap-to-mark — long-press anywhere on the map opens a type picker for the tapped point.
+    var pendingTapLatLon by remember { mutableStateOf<Pair<Double, Double>?>(null) }
 
     LaunchedEffect(Unit) {
         Configuration.getInstance()
@@ -114,6 +127,48 @@ fun MapFallbackViewMulti(
         }
     }
 
+    // Tap-to-mark: long-press anywhere on the map opens a SAR type picker dialog
+    // populated with the tapped coordinate. Tool invocation pattern — the user
+    // selects a marker type, the app drops the marker via MarkerStore.
+    LaunchedEffect(mapView) {
+        val eventsOverlay = org.osmdroid.views.overlay.MapEventsOverlay(
+            object : org.osmdroid.events.MapEventsReceiver {
+                override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean = false
+                override fun longPressHelper(p: GeoPoint?): Boolean {
+                    p ?: return false
+                    pendingTapLatLon = p.latitude to p.longitude
+                    return true
+                }
+            },
+        )
+        mapView.overlays.add(0, eventsOverlay)
+    }
+
+    // Live GPS subscription — 2s / 5m updates, both providers, auto-cleanup on dispose.
+    DisposableEffect(Unit) {
+        val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val listener = object : LocationListener {
+            override fun onLocationChanged(loc: Location) {
+                liveGps = loc.latitude to loc.longitude
+            }
+            override fun onProviderEnabled(p: String) {}
+            override fun onProviderDisabled(p: String) {}
+            @Deprecated("Deprecated in Java")
+            override fun onStatusChanged(p: String?, status: Int, extras: Bundle?) {}
+        }
+        listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER).forEach { p ->
+            runCatching {
+                if (lm.isProviderEnabled(p)) {
+                    lm.requestLocationUpdates(p, 2000L, 5f, listener)
+                }
+            }
+        }
+        onDispose { runCatching { lm.removeUpdates(listener) } }
+    }
+
+    // Puck icon (blue dot with white ring) — built once.
+    val puckIcon = remember(context) { makePuckIcon(context) }
+
     // Pre-build colored icons once per CotType (avoids recreating on every recomposition).
     val cotIcons = remember(context) {
         MarkerStore.CotType.entries.associateWith { type ->
@@ -123,9 +178,9 @@ fun MapFallbackViewMulti(
 
     // Re-apply markers whenever the list changes.
     LaunchedEffect(markers) {
-        mapView.overlays.clear()
+        // Preserve puck across marker rebuilds (added in liveGps LaunchedEffect below).
+        mapView.overlays.removeAll { it !is Marker || (it as Marker).title != PUCK_TITLE }
         if (markers.isEmpty()) {
-            // Center on GPS if available, otherwise world view.
             deviceLatLon?.let {
                 mapView.controller.setZoom(14.0)
                 mapView.controller.setCenter(GeoPoint(it.first, it.second))
@@ -155,7 +210,6 @@ fun MapFallbackViewMulti(
                 },
             )
         }
-        // Include GPS position in bounding box so user sees self + markers
         val allPoints = if (deviceLatLon != null) {
             points + GeoPoint(deviceLatLon.first, deviceLatLon.second)
         } else {
@@ -167,6 +221,26 @@ fun MapFallbackViewMulti(
         } else {
             val bbox = BoundingBox.fromGeoPoints(allPoints)
             mapView.post { mapView.zoomToBoundingBox(bbox, true, 80) }
+        }
+        mapView.invalidate()
+    }
+
+    // Puck overlay + tracking — refreshed whenever liveGps updates.
+    LaunchedEffect(liveGps, isTracking) {
+        val gps = liveGps ?: return@LaunchedEffect
+        // Remove old puck (identified by PUCK_TITLE), add fresh one.
+        mapView.overlays.removeAll { it is Marker && it.title == PUCK_TITLE }
+        mapView.overlays.add(
+            Marker(mapView).apply {
+                position = GeoPoint(gps.first, gps.second)
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                title = PUCK_TITLE
+                snippet = "${"%.5f".format(gps.first)}, ${"%.5f".format(gps.second)}"
+                icon = puckIcon
+            },
+        )
+        if (isTracking) {
+            mapView.controller.animateTo(GeoPoint(gps.first, gps.second))
         }
         mapView.invalidate()
     }
@@ -208,22 +282,51 @@ fun MapFallbackViewMulti(
             }
         }
 
-        // My Location button — bottom-right (Google Maps convention)
-        // Tap: center on GPS. Long-tap not needed — center is enough; marking is done via button above.
+        // Location controls — bottom-right column: [Track toggle] / [Center on me]
         if (deviceLatLon != null) {
-            IconButton(
-                onClick = {
-                    mapView.controller.animateTo(GeoPoint(deviceLatLon.first, deviceLatLon.second))
-                    mapView.controller.setZoom(15.0)
-                    onMarkMyLocation?.invoke(deviceLatLon.first, deviceLatLon.second)
-                },
+            Column(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 8.dp, bottom = 28.dp)
-                    .background(Color(0xFF1A1A1A), androidx.compose.foundation.shape.CircleShape)
-                    .size(40.dp),
+                    .padding(end = 8.dp, bottom = 28.dp),
+                horizontalAlignment = Alignment.End,
             ) {
-                Icon(Icons.Default.MyLocation, contentDescription = "My location", tint = io.kognis.tactical.ui.theme.RescueAmber, modifier = Modifier.size(20.dp))
+                // Track toggle — amber when active, animates map on every GPS update.
+                IconButton(
+                    onClick = { isTracking = !isTracking },
+                    modifier = Modifier
+                        .background(
+                            if (isTracking) io.kognis.tactical.ui.theme.RescueAmber else Color(0xFF1A1A1A),
+                            androidx.compose.foundation.shape.CircleShape,
+                        )
+                        .size(40.dp),
+                ) {
+                    Icon(
+                        Icons.Default.Navigation,
+                        contentDescription = if (isTracking) "Stop tracking" else "Track my location",
+                        tint = if (isTracking) Color.Black else io.kognis.tactical.ui.theme.RescueAmber,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                // Center on me — one-shot recenter on current GPS fix.
+                IconButton(
+                    onClick = {
+                        liveGps?.let {
+                            mapView.controller.animateTo(GeoPoint(it.first, it.second))
+                            mapView.controller.setZoom(16.0)
+                        }
+                    },
+                    modifier = Modifier
+                        .background(Color(0xFF1A1A1A), androidx.compose.foundation.shape.CircleShape)
+                        .size(40.dp),
+                ) {
+                    Icon(
+                        Icons.Default.MyLocation,
+                        contentDescription = "Center on my location",
+                        tint = io.kognis.tactical.ui.theme.RescueAmber,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
             }
         }
 
@@ -238,7 +341,93 @@ fun MapFallbackViewMulti(
                 .background(Color(0x88000000))
                 .padding(horizontal = 6.dp, vertical = 2.dp),
         )
+
+        // Tap-to-mark picker: triggered by long-press on map; lets operator pick SAR type.
+        pendingTapLatLon?.let { (tapLat, tapLon) ->
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { pendingTapLatLon = null },
+                containerColor = Color(0xFF1A1A1A),
+                title = {
+                    Text("Mark this point?", color = Color.White)
+                },
+                text = {
+                    Column {
+                        Text(
+                            "${"%.5f".format(tapLat)}, ${"%.5f".format(tapLon)}",
+                            color = Color(0xFFFFC107),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(bottom = 8.dp),
+                        )
+                        Text("Select marker type:", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
+                        Spacer(Modifier.height(8.dp))
+                        // 4 types per row — quick tap selection
+                        val types = MarkerStore.CotType.entries
+                        types.chunked(4).forEach { row ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                                row.forEach { t ->
+                                    androidx.compose.material3.TextButton(
+                                        modifier = Modifier.weight(1f),
+                                        onClick = {
+                                            MarkerStore.add(
+                                                MarkerStore.Entry(
+                                                    location = LocationJsonExtractor.Location(tapLat, tapLon, t.label, t.name),
+                                                    source = MarkerStore.Source.OSMDROID,
+                                                    cotType = t,
+                                                    queryPreview = "Tap-to-mark",
+                                                    modelName = "MANUAL",
+                                                ),
+                                            )
+                                            pendingTapLatLon = null
+                                        },
+                                    ) {
+                                        Text("[${t.symbol}] ${t.label.take(8)}", color = Color(t.colorArgb), fontSize = 11.sp)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {},
+                dismissButton = {
+                    androidx.compose.material3.TextButton(onClick = { pendingTapLatLon = null }) {
+                        Text("Cancel", color = Color.Gray)
+                    }
+                },
+            )
+        }
     }
+}
+
+/** Title used to tag the live-GPS puck so we can find/remove it across overlay rebuilds. */
+private const val PUCK_TITLE = "__kognis_gps_puck__"
+
+/** Google-Maps-style puck: white outer ring + accent ring + solid blue center. */
+private fun makePuckIcon(context: android.content.Context): BitmapDrawable {
+    val dp = context.resources.displayMetrics.density
+    val size = (28 * dp).toInt().coerceAtLeast(28)
+    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    val cx = size / 2f
+    val cy = size / 2f
+    val rOuter = size / 2f - (1 * dp)
+    val rRing = rOuter - (3 * dp)
+    val rDot = rRing - (2 * dp)
+    val white = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.WHITE
+        style = Paint.Style.FILL
+    }
+    val blueDark = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.argb(255, 13, 71, 161) // material blue 900
+        style = Paint.Style.FILL
+    }
+    val blue = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.argb(255, 30, 136, 229) // material blue 600
+        style = Paint.Style.FILL
+    }
+    canvas.drawCircle(cx, cy, rOuter, white)
+    canvas.drawCircle(cx, cy, rRing, blueDark)
+    canvas.drawCircle(cx, cy, rDot, blue)
+    return BitmapDrawable(context.resources, bitmap)
 }
 
 private fun makeCotMarkerIcon(context: android.content.Context, colorArgb: Int, symbol: String): BitmapDrawable {

@@ -60,6 +60,42 @@ Everything is local. No outbound network calls during inference.
 
 ---
 
+## Agentic architecture
+
+Kognis Lite implements a lightweight tool-using agent loop on-device. Five components cooperate to turn an operator's natural-language input into a deterministic field action — without ever leaving the device.
+
+### Agents and tools
+
+| Component | Type | Role |
+|-----------|------|------|
+| `QueryPreprocessor` | Pre-LLM intent router agent | Classifies operator input into one of three intents (coordinate-mark, GPS-mark, knowledge query) using regex + rule-based SAR-type classification across 8 INSARAG-aligned marker categories. Routes around the LLM entirely when it can act deterministically. |
+| `RagOrchestrator` | Retrieval strategy agent | Selects per-query retrieval mode (`Auto` / `Always` / `Never` / `NoMap`). Runs hybrid HNSW + BM25 with Reciprocal-Rank-Fusion; falls back to full-text BM25 when semantic recall is low. Bypasses retrieval entirely when explicit coordinates are present in the query (the LLM has everything it needs). |
+| `Gemma 4 E2B` (LiteRT-LM) | Reasoning model | Generates the operator-facing answer. Emits structured tool calls as `LOCATION_JSON: {...}` sentinel tags on the last line of the response. |
+| `LocationJsonExtractor` | Tool-call parser | Parses the sentinel-token tool call into a typed `Location` (lat, lon, label, SAR type). Drops the marker into `MarkerStore`. |
+| `VoiceInputAgent` + `FlashlightTool` | Local-action tools | Hands-free speech-to-text input (Android on-device SpeechRecognizer); torch toggle for low-light field work. Both run with zero network. |
+
+### Closed agentic loop
+
+```
+operator input (text or voice)
+  ↓
+QueryPreprocessor   ← classifies intent, extracts coordinates, infers SAR type
+  ↓
+RagOrchestrator     ← selects retrieval mode, runs hybrid search if needed
+  ↓
+Gemma 4 E2B (on-device, GPU/NPU)
+  ↓
+LocationJsonExtractor ← parses tool call, dispatches to MarkerStore
+  ↓
+Android map action  ← OsmAnd / Google Maps / osmdroid fallback
+  ↓
+Marker state + GPS distance fed back into next prompt
+```
+
+This is a function-calling pattern implemented with structured-output parsing rather than a native tool-call API — chosen because LiteRT-LM 0.11.0 does not yet expose a `ToolProvider` interface for Gemma 4 E2B (planned for v1.1). The contract is otherwise identical: the model emits a typed action, the host parses it, dispatches to a registered tool, and feeds the result back into context.
+
+---
+
 ## Model
 
 | Name in UI | File | Runtime | tok/s\* | Multi-turn |
@@ -160,16 +196,9 @@ The Gemma 4 model itself is **not** in the repo or the APK — see **Setup** for
 
 ---
 
-## Project Structure — Lite vs Full
+## Project Structure
 
-This is **kognis-lite-sar** — the public, hackathon version. It uses only Gemma 4 models via LiteRT-LM. The full version (`Kognis-app`) includes additional model backends and private corpora and is not public.
-
-| | kognis-lite-sar (this repo) | Kognis-app (private) |
-|---|---|---|
-| Model | Gemma 4 E2B only (LiteRT-LM) | Gemma 4 + additional backends |
-| Corpus | INSARAG / UNDAC public docs | INSARAG + private regional docs |
-| License | Apache 2.0 | Proprietary |
-| Folder | `/Users/alcastaro/Documents/Kognis-Tak/kognis-lite-sar` | `/Users/alcastaro/Documents/Kognis-Tak/Kognis-app` |
+This is the public, hackathon version. It uses only Gemma 4 models via LiteRT-LM. An extended internal version exists with additional model backends and private datasets.
 
 ---
 
@@ -183,7 +212,7 @@ This is **kognis-lite-sar** — the public, hackathon version. It uses only Gemm
 
 ### 2. Get Gemma 4 E2B (`.litertlm`)
 
-Download `gemma4-e2b-it-int8.litertlm` (≈ 2.4 GB) from Google AI Edge / Kaggle Models (Gemma 4 LiteRT distribution). Place in `/sdcard/Download/` on the device.
+Download `gemma-4-E2B-it.litertlm` (≈ 2.4 GB) from Google AI Edge / Kaggle Models (Gemma 4 LiteRT distribution). Place in `/sdcard/Download/` on the device.
 
 ### 3. Sideload the model
 
