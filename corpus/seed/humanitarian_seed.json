@@ -1,0 +1,250 @@
+[
+  {
+    "source": "Sphere Handbook 2018",
+    "section": "Humanitarian Charter",
+    "title_es": "Carta Humanitaria — derecho a vivir con dignidad",
+    "content_es": "La Carta Humanitaria afirma que toda persona afectada por un desastre o conflicto armado tiene derecho a recibir protección y asistencia que garanticen las condiciones básicas para vivir con dignidad. Los principios fundamentales son: humanidad (aliviar el sufrimiento humano dondequiera que se encuentre), imparcialidad (la asistencia se basa solo en la necesidad, sin discriminación por raza, género, edad, religión o nacionalidad), neutralidad (no tomar partido en hostilidades) e independencia (autonomía respecto a objetivos políticos, económicos o militares). Las personas afectadas son sujetos de derechos, no receptores pasivos.",
+    "title_en": "Humanitarian Charter — right to life with dignity",
+    "content_en": "The Humanitarian Charter affirms that every person affected by disaster or armed conflict has the right to protection and assistance that guarantee the basic conditions for life with dignity. The core principles are: humanity (alleviate human suffering wherever it is found), impartiality (assistance is based on need alone, without discrimination by race, gender, age, religion, or nationality), neutrality (no taking sides in hostilities), and independence (autonomy from political, economic, or military objectives). Affected populations are rights-holders, not passive recipients."
+  },
+  {
+    "source": "Sphere Handbook 2018",
+    "section": "Protection Principles",
+    "title_es": "Principios de Protección — evitar daño y promover derechos",
+    "content_es": "Los cuatro Principios de Protección de Sphere son: 1) Evitar exponer a las personas a un daño mayor como resultado de las propias acciones humanitarias. 2) Garantizar el acceso a una asistencia imparcial proporcional a las necesidades y sin discriminación. 3) Proteger a las personas de la violencia física y psicológica, la coerción y la privación. 4) Ayudar a las personas a reclamar sus derechos, acceder a recursos disponibles y recuperarse de los efectos del abuso. Estos principios aplican a toda intervención humanitaria, sin importar el sector.",
+    "title_en": "Protection Principles — do no harm, advance rights",
+    "content_en": "Sphere's four Protection Principles are: 1) Avoid exposing people to further harm as a result of humanitarian action. 2) Ensure people's access to impartial assistance, in proportion to need and without discrimination. 3) Protect people from physical and psychological harm arising from violence and coercion. 4) Assist people to claim their rights, access available remedies, and recover from abuse. These principles apply across every sector of humanitarian response."
+  },
+  {
+    "source": "Sphere Handbook 2018",
+    "section": "WASH — minimum water quantities",
+    "title_es": "Agua — cantidades mínimas en emergencia",
+    "content_es": "La cantidad mínima de agua por persona y día en una emergencia es de 15 litros, distribuidos así: 2.5 a 3 litros para beber y cocinar, 2 a 6 litros para higiene básica y 6 a 7 litros para lavado de ropa y limpieza. En climas calurosos, durante embarazo o lactancia, o en presencia de enfermos, la cantidad debe aumentarse. La fuente más cercana no debe estar a más de 500 metros del refugio y el tiempo de espera en el punto de agua no debe exceder 30 minutos. La cloración residual del agua almacenada debe ser de 0.2 a 0.5 mg/L.",
+    "title_en": "Water — minimum quantities in emergency",
+    "content_en": "The minimum quantity of water per person per day in an emergency is 15 liters, distributed as: 2.5 to 3 liters for drinking and cooking, 2 to 6 liters for basic hygiene, and 6 to 7 liters for laundry and cleaning. In hot climates, during pregnancy or lactation, or in the presence of sick persons, this quantity must increase. The nearest water source should not be more than 500 m from the shelter and queue time at the water point should not exceed 30 minutes. Residual chlorine in stored water should be 0.2 to 0.5 mg/L."
+  },
+  {
+    "source": "Sphere Handbook 2018",
+    "section": "WASH — sanitation",
+    "title_es": "Saneamiento — letrinas y manejo de excretas",
+    "content_es": "El estándar mínimo es una letrina por cada 20 personas en emergencia aguda, reduciendo progresivamente a una por cada 6 personas (idealmente por familia). Las letrinas deben estar a no más de 50 metros del refugio, a no más de 100 metros de fuentes de agua y al menos 1.5 metros por encima del nivel freático. Deben ser accesibles para personas con discapacidad, separadas por sexo, contar con cerrojo interno y iluminación nocturna segura. El lavado de manos con agua y jabón en puntos cercanos a letrinas reduce diarrea hasta 40 por ciento.",
+    "title_en": "Sanitation — latrines and excreta management",
+    "content_en": "The minimum standard is one latrine per 20 people in acute emergency, gradually reducing to one per 6 (ideally one per family). Latrines should be no more than 50 m from shelters, no more than 100 m from water sources, and at least 1.5 m above the water table. They must be accessible for persons with disabilities, separated by sex, have an internal lock, and safe nighttime lighting. Handwashing with soap and water near latrines reduces diarrhea by up to 40 percent."
+  },
+  {
+    "source": "Sphere Handbook 2018",
+    "section": "Food Security and Nutrition",
+    "title_es": "Energía alimentaria mínima por persona",
+    "content_es": "La ingesta energética mínima de planificación en emergencia es de 2100 kilocalorías por persona y día, con 10 a 12 por ciento de la energía proveniente de proteínas y al menos 17 por ciento de grasas. Esta cifra se ajusta por la composición demográfica (edad, sexo, lactancia, embarazo), clima, nivel de actividad y estado nutricional preexistente. Niños menores de cinco años, embarazadas, lactantes y adultos mayores requieren atención prioritaria y suplementación específica. La diversidad de la dieta (al menos cuatro grupos alimentarios) reduce desnutrición a mediano plazo.",
+    "title_en": "Minimum food energy per person",
+    "content_en": "The minimum planning food-energy intake in emergency is 2100 kilocalories per person per day, with 10 to 12 percent of energy from protein and at least 17 percent from fat. This figure is adjusted for demographic composition (age, sex, lactation, pregnancy), climate, activity level, and pre-existing nutritional status. Children under five, pregnant women, lactating mothers, and the elderly require priority attention and specific supplementation. Dietary diversity (at least four food groups) reduces medium-term malnutrition."
+  },
+  {
+    "source": "WHO Basic Emergency Care",
+    "section": "ABCDE primary survey",
+    "title_es": "Evaluación primaria ABCDE en trauma",
+    "content_es": "La evaluación primaria del paciente crítico sigue la secuencia ABCDE: A) Airway con control cervical — abrir vía aérea, retirar cuerpos extraños, considerar lesión cervical en trauma. B) Breathing — observar simetría, frecuencia respiratoria, saturación; descomprimir neumotórax a tensión si hay desviación traqueal o ausencia de murmullo unilateral. C) Circulation con control de hemorragia — compresión directa, torniquete en extremidad si hemorragia masiva, evaluar pulso, color y llenado capilar. D) Disability — escala AVDI o Glasgow, reactividad pupilar, glucemia capilar. E) Exposure — exponer al paciente para inspección completa y prevenir hipotermia.",
+    "title_en": "ABCDE primary survey in trauma",
+    "content_en": "The primary survey of a critical patient follows ABCDE: A) Airway with cervical control — open airway, remove foreign bodies, suspect cervical injury in trauma. B) Breathing — observe symmetry, respiratory rate, saturation; decompress tension pneumothorax if tracheal deviation or unilateral absent breath sounds. C) Circulation with hemorrhage control — direct pressure, limb tourniquet for massive bleeding, assess pulse, color, capillary refill. D) Disability — AVPU or Glasgow scale, pupil reactivity, capillary glucose. E) Exposure — fully expose the patient for inspection and prevent hypothermia."
+  },
+  {
+    "source": "WHO Basic Emergency Care",
+    "section": "Mass casualty triage",
+    "title_es": "Triage por colores en víctimas múltiples",
+    "content_es": "El sistema START de triage en víctimas múltiples clasifica con cuatro colores: ROJO (inmediato) — necesita intervención que salva la vida en minutos, vía aérea comprometida, hemorragia masiva, frecuencia respiratoria mayor a 30 o llenado capilar mayor a 2 segundos. AMARILLO (diferido) — lesiones serias pero estables, intervención puede esperar entre 30 minutos y dos horas. VERDE (leve) — heridas menores, ambulatorio, puede esperar varias horas. NEGRO (fallecido o expectante) — sin signos vitales tras maniobra básica o lesiones incompatibles con supervivencia dado el recurso disponible. La triage se repite cada vez que cambia la situación.",
+    "title_en": "Color-coded mass casualty triage",
+    "content_en": "The START triage system classifies multiple casualties into four colors: RED (immediate) — needs life-saving intervention within minutes, compromised airway, massive bleeding, respiratory rate greater than 30, or capillary refill greater than 2 seconds. YELLOW (delayed) — serious but stable injuries, intervention may wait 30 minutes to two hours. GREEN (minor) — walking wounded, can wait several hours. BLACK (deceased or expectant) — no signs of life after basic maneuvers, or injuries incompatible with survival given available resources. Triage is repeated each time the situation changes."
+  },
+  {
+    "source": "WHO Basic Emergency Care",
+    "section": "Hemorrhage control",
+    "title_es": "Control de hemorragia externa masiva",
+    "content_es": "Ante hemorragia externa visible, el orden de actuación es: 1) Compresión directa con gasa o tela limpia sobre la herida, mantener al menos 5 minutos sin levantar para inspeccionar. 2) Si la herida está en extremidad y la compresión no controla, colocar torniquete a 5 a 7 cm proximal a la herida (nunca sobre articulación), apretar hasta detener el sangrado y anotar hora de aplicación. 3) Apósito hemostático en herida de tronco o cuello donde no se puede aplicar torniquete. 4) Evitar elevar la extremidad si hay sospecha de fractura. Hora de aplicación del torniquete debe ir visible en la víctima.",
+    "title_en": "Massive external hemorrhage control",
+    "content_en": "For visible external bleeding the action sequence is: 1) Direct compression with gauze or clean cloth over the wound, hold at least 5 minutes without lifting to inspect. 2) If the wound is on a limb and compression fails, apply a tourniquet 5 to 7 cm proximal to the wound (never over a joint), tighten until bleeding stops, and record the time of application. 3) Hemostatic dressing for truncal or neck wounds where a tourniquet cannot be applied. 4) Avoid elevating the limb if a fracture is suspected. The tourniquet application time must be visible on the casualty."
+  },
+  {
+    "source": "Tactical/Field First Aid (public protocols)",
+    "section": "MARCH algorithm",
+    "title_es": "Protocolo MARCH en trauma de campo",
+    "content_es": "El algoritmo MARCH ordena la atención prehospitalaria al paciente traumatizado en cinco letras: M (Massive hemorrhage) — control de sangrado masivo antes que vía aérea; torniquete o presión directa. A (Airway) — asegurar vía aérea permeable con maniobras manuales, cánula nasofaríngea o posición lateral de seguridad. R (Respiration) — evaluar y tratar neumotórax abierto con sello de tres lados o aguja descompresiva si a tensión. C (Circulation) — pulso, signos de shock, reposición con fluidos si disponible, recalentamiento. H (Head injury / Hypothermia) — proteger vía aérea ante alteración de consciencia, prevenir hipotermia con manta térmica. La hipotermia agrava la coagulopatía traumática.",
+    "title_en": "MARCH algorithm in field trauma",
+    "content_en": "The MARCH algorithm orders prehospital care of the trauma patient into five letters: M (Massive hemorrhage) — control catastrophic bleeding before airway; tourniquet or direct pressure. A (Airway) — secure airway with manual maneuvers, nasopharyngeal cannula, or recovery position. R (Respiration) — assess and treat open pneumothorax with three-sided seal or needle decompression for tension pneumothorax. C (Circulation) — pulse, signs of shock, fluid resuscitation if available, rewarming. H (Head injury / Hypothermia) — protect airway in altered consciousness, prevent hypothermia with thermal blanket. Hypothermia worsens traumatic coagulopathy."
+  },
+  {
+    "source": "ICRC First Aid Manual",
+    "section": "Recovery position",
+    "title_es": "Posición lateral de seguridad",
+    "content_es": "La posición lateral de seguridad se usa en paciente inconsciente que respira espontáneamente. Procedimiento: 1) Arrodillarse junto a la víctima, retirar gafas y objetos rígidos. 2) Brazo cercano al rescatista en ángulo recto con palma hacia arriba. 3) Brazo lejano cruzado sobre el pecho, dorso de la mano contra la mejilla cercana. 4) Flexionar la rodilla lejana y tirar de ella para girar al paciente sobre su lado. 5) Ajustar la mano bajo la mejilla para mantener vía aérea abierta. 6) Re-evaluar respiración cada minuto. Si no respira, iniciar reanimación cardiopulmonar.",
+    "title_en": "Recovery position",
+    "content_en": "The recovery position is used for an unconscious patient who breathes spontaneously. Procedure: 1) Kneel beside the casualty, remove glasses and rigid objects. 2) Place the near arm at a right angle with palm facing up. 3) Bring the far arm across the chest, back of hand against the near cheek. 4) Bend the far knee and pull on it to roll the patient onto their side. 5) Adjust the hand under the cheek to keep the airway open. 6) Re-check breathing every minute. If not breathing, start CPR."
+  },
+  {
+    "source": "ICRC First Aid Manual",
+    "section": "CPR — adult",
+    "title_es": "Reanimación cardiopulmonar en adulto",
+    "content_es": "Ante un adulto sin respuesta y sin respiración normal: 1) Pedir ayuda y desfibrilador externo automático. 2) Compresiones torácicas en el centro del pecho, profundidad de 5 a 6 cm, frecuencia 100 a 120 por minuto, permitir reexpansión completa. 3) Ventilaciones 2:30 (dos ventilaciones por cada 30 compresiones) si está entrenado; si no, solo compresiones continuas. 4) Aplicar DEA tan pronto llegue, seguir indicaciones de voz. 5) Continuar hasta que la víctima respire, llegue ayuda avanzada o el rescatista esté agotado. Minimizar interrupciones — cada pausa reduce supervivencia.",
+    "title_en": "Adult CPR",
+    "content_en": "For an unresponsive adult who is not breathing normally: 1) Call for help and an AED. 2) Chest compressions in the center of the chest, 5 to 6 cm deep, 100 to 120 per minute, full chest recoil between compressions. 3) Ventilations at 30:2 (two breaths per 30 compressions) if trained; otherwise compressions only. 4) Apply the AED as soon as it arrives and follow voice prompts. 5) Continue until the casualty breathes, advanced help arrives, or the rescuer is exhausted. Minimize interruptions — each pause reduces survival."
+  },
+  {
+    "source": "ICRC First Aid Manual",
+    "section": "Burns",
+    "title_es": "Manejo inicial de quemaduras",
+    "content_es": "En quemadura térmica: 1) Detener la fuente de calor, retirar ropa caliente que no esté adherida. 2) Enfriar con agua corriente entre 15 y 25 grados Celsius por al menos 20 minutos; nunca usar hielo. 3) Cubrir con apósito limpio no adhesivo o film plástico estéril. 4) No aplicar cremas, ungüentos ni remedios caseros. 5) Calcular la superficie quemada con la regla de los 9 en adulto (cabeza 9 por ciento, cada brazo 9 por ciento, cada pierna 18 por ciento, tronco anterior 18 por ciento, tronco posterior 18 por ciento, periné 1 por ciento). 6) Quemadura mayor del 10 por ciento en niño o 15 por ciento en adulto requiere evacuación.",
+    "title_en": "Initial burn management",
+    "content_en": "For thermal burns: 1) Stop the heat source, remove hot clothing that is not stuck to skin. 2) Cool with running water at 15 to 25 degrees Celsius for at least 20 minutes; never use ice. 3) Cover with a clean non-adherent dressing or sterile cling film. 4) Do not apply creams, ointments, or home remedies. 5) Estimate burned surface using the Rule of Nines in adults (head 9 percent, each arm 9 percent, each leg 18 percent, anterior trunk 18 percent, posterior trunk 18 percent, perineum 1 percent). 6) Burns greater than 10 percent in a child or 15 percent in an adult require evacuation."
+  },
+  {
+    "source": "ICRC First Aid Manual",
+    "section": "Hypothermia",
+    "title_es": "Hipotermia — reconocimiento y manejo",
+    "content_es": "La hipotermia se define como temperatura corporal central menor a 35 grados Celsius. Signos: temblor (en estadios iniciales), bradicardia, confusión, lentitud motora, piel fría y pálida. En hipotermia severa el temblor desaparece. Manejo: 1) Retirar de la fuente de frío y de la ropa húmeda. 2) Aislar del suelo y del viento. 3) Recalentamiento pasivo con mantas térmicas, evitar movimientos bruscos que pueden desencadenar arritmia. 4) No dar alcohol, café ni masajes en extremidades. 5) Si está consciente y puede tragar, bebida tibia azucarada. 6) Si hipotermia severa, evacuar manteniendo paciente horizontal — el frío persiste durante el traslado.",
+    "title_en": "Hypothermia — recognition and management",
+    "content_en": "Hypothermia is defined as a core body temperature below 35 degrees Celsius. Signs: shivering (early stages), bradycardia, confusion, motor slowness, cold pale skin. In severe hypothermia shivering disappears. Management: 1) Remove from the cold source and from wet clothing. 2) Insulate from the ground and wind. 3) Passive rewarming with thermal blankets, avoid abrupt movements that may trigger arrhythmia. 4) Do not give alcohol, coffee, or massage the limbs. 5) If conscious and able to swallow, give a warm sweet drink. 6) For severe hypothermia evacuate keeping the patient horizontal — cold persists during transport."
+  },
+  {
+    "source": "ICRC First Aid Manual",
+    "section": "Heat illness",
+    "title_es": "Golpe de calor y agotamiento por calor",
+    "content_es": "Agotamiento por calor: temperatura central entre 37 y 40 grados, sudoración profusa, debilidad, náusea, cefalea, paciente alerta. Manejo: trasladar a sombra, retirar exceso de ropa, hidratar oralmente con solución salina o agua con sal, refrescar con paños húmedos. Golpe de calor: temperatura mayor a 40 grados, alteración del estado mental, piel caliente que puede estar seca, posible convulsión. Es emergencia que pone en riesgo la vida. Manejo: enfriamiento agresivo con agua, hielo en cuello, axilas e ingles, ventilación, vía aérea protegida, evacuación inmediata. No dar antitérmicos por boca a paciente con alteración de consciencia.",
+    "title_en": "Heat stroke and heat exhaustion",
+    "content_en": "Heat exhaustion: core temperature between 37 and 40 degrees, profuse sweating, weakness, nausea, headache, alert patient. Management: move to shade, remove excess clothing, oral rehydration with saline solution or water with salt, cool with damp cloths. Heat stroke: temperature above 40 degrees, altered mental status, hot skin that may be dry, possible seizure. This is a life-threatening emergency. Management: aggressive cooling with water, ice to neck, armpits, and groin, fanning, protected airway, immediate evacuation. Do not give oral antipyretics to a patient with altered consciousness."
+  },
+  {
+    "source": "ICRC First Aid Manual",
+    "section": "Fracture immobilization",
+    "title_es": "Inmovilización de fracturas en campo",
+    "content_es": "Ante sospecha de fractura: 1) No mover al paciente innecesariamente. 2) Controlar hemorragia si la fractura es abierta — apósito estéril sin reducir el hueso. 3) Inmovilizar la articulación por encima y por debajo del foco de fractura. 4) Usar férula improvisada con material rígido (rama, cartón, ropa enrollada) acolchada con tela. 5) Vigilar pulso distal, temperatura y sensibilidad antes y después de inmovilizar; si se pierde, aflojar. 6) En fractura de fémur o pelvis, sospechar pérdida sanguínea significativa y manejar como politraumatizado. 7) Cabeza, cuello y columna requieren inmovilización en bloque y evacuación cuidadosa.",
+    "title_en": "Field fracture immobilization",
+    "content_en": "For suspected fracture: 1) Do not move the patient unnecessarily. 2) Control bleeding if the fracture is open — sterile dressing without reducing the bone. 3) Immobilize the joint above and below the fracture site. 4) Use an improvised splint with rigid material (branch, cardboard, rolled clothing) padded with cloth. 5) Check distal pulse, temperature, and sensation before and after splinting; if lost, loosen. 6) In femur or pelvic fracture, suspect significant blood loss and manage as polytrauma. 7) Head, neck, and spine require log-roll immobilization and careful evacuation."
+  },
+  {
+    "source": "OCHA Flash Flood Guidelines",
+    "section": "Evacuation in flash floods",
+    "title_es": "Evacuación ante crecida súbita",
+    "content_es": "Las inundaciones repentinas dan minutos, no horas, para evacuar. Indicadores tempranos: lluvia intensa cuenca arriba, sonidos de truenos sin tormenta visible, cambio rápido de color o caudal del río. Acciones: 1) Trasladarse a terreno alto perpendicular a la dirección del agua, no río arriba. 2) Evitar puentes bajos, vados y caminos de fondo de quebrada. 3) Un vehículo flota con 60 cm de agua y un adulto pierde equilibrio con 15 cm en flujo rápido — no cruzar a pie ni en vehículo. 4) Llevar documentación, agua, linterna, silbato y abrigo. 5) Punto de reunión preestablecido a 30 metros por encima de la cota de inundación histórica. 6) Reportar paradero a familia o coordinador por el medio disponible.",
+    "title_en": "Flash flood evacuation",
+    "content_en": "Flash floods give minutes, not hours, to evacuate. Early indicators: intense rainfall upstream in the catchment, thunder sounds without visible storm, rapid color or flow change in the river. Actions: 1) Move to high ground perpendicular to water flow, not upstream. 2) Avoid low bridges, fords, and gully-bottom roads. 3) A vehicle floats in 60 cm of water and an adult loses balance in 15 cm of fast flow — do not cross on foot or in vehicle. 4) Bring documents, water, flashlight, whistle, and a warm layer. 5) Pre-established rally point 30 m above historical flood level. 6) Report your whereabouts to family or coordinator by available means."
+  },
+  {
+    "source": "OCHA Coordination Handbook",
+    "section": "Initial assessment",
+    "title_es": "Evaluación inicial multisectorial",
+    "content_es": "La evaluación rápida multisectorial en las primeras 72 horas estima: 1) Número total de personas afectadas, fallecidos, desaparecidos y heridos. 2) Acceso físico al área — vías abiertas, puentes destruidos, helipuertos disponibles. 3) Estado de servicios básicos — agua potable, electricidad, comunicaciones, salud. 4) Necesidades prioritarias por sector — refugio, alimentación, agua, saneamiento, salud, protección. 5) Capacidades locales remanentes — instituciones funcionales, líderes comunitarios, organizaciones presentes. 6) Riesgos secundarios — réplicas, enfermedad, violencia. La evaluación se reporta en formato MIRA y se actualiza cada 24 horas hasta estabilizar.",
+    "title_en": "Initial multi-sector assessment",
+    "content_en": "The rapid multi-sector assessment in the first 72 hours estimates: 1) Total number of affected persons, fatalities, missing, injured. 2) Physical access to the area — open roads, destroyed bridges, available helipads. 3) Status of basic services — drinking water, electricity, communications, health. 4) Priority needs by sector — shelter, food, water, sanitation, health, protection. 5) Remaining local capacity — functioning institutions, community leaders, present organizations. 6) Secondary risks — aftershocks, disease, violence. The assessment is reported in MIRA format and updated every 24 hours until stabilization."
+  },
+  {
+    "source": "WHO Basic Emergency Care",
+    "section": "Dehydration",
+    "title_es": "Deshidratación — clasificación y rehidratación",
+    "content_es": "Deshidratación leve a moderada: sed, mucosa oral seca, oliguria, signo de pliegue lento, taquicardia. Manejo: solución de rehidratación oral (SRO) a libre demanda, 75 mL por kilogramo en 4 horas si moderada. Deshidratación severa: letargia o inconsciencia, ojos hundidos, pliegue muy lento, pulso débil, hipotensión, anuria. Es emergencia. Manejo: acceso intravenoso, Ringer lactato o salino 0.9 por ciento, 30 mL por kilogramo en 30 minutos en adulto (1 hora en niño), repetir según respuesta. Continuar SRO en cuanto el paciente pueda beber. La SRO casera es: 1 litro de agua segura, 6 cucharaditas de azúcar, media cucharadita de sal.",
+    "title_en": "Dehydration — classification and rehydration",
+    "content_en": "Mild to moderate dehydration: thirst, dry oral mucosa, oliguria, slow skin pinch return, tachycardia. Management: oral rehydration solution (ORS) ad libitum, 75 mL per kilogram over 4 hours if moderate. Severe dehydration: lethargy or unconsciousness, sunken eyes, very slow skin pinch, weak pulse, hypotension, anuria. This is an emergency. Management: IV access, Ringer's lactate or 0.9 percent saline, 30 mL per kilogram over 30 minutes in an adult (1 hour in a child), repeat per response. Continue ORS as soon as the patient can drink. Homemade ORS: 1 liter of safe water, 6 teaspoons of sugar, half a teaspoon of salt."
+  },
+  {
+    "source": "WHO Cholera Outbreak Response",
+    "section": "Cholera triage and treatment",
+    "title_es": "Cólera — triage y manejo en brote",
+    "content_es": "El cólera causa diarrea acuosa profusa con rápida deshidratación. Triage en centro de tratamiento: A) Sin deshidratación — SRO ambulatorio. B) Deshidratación moderada — SRO supervisado, observación 6 horas. C) Deshidratación severa — Plan C, IV inmediato, antibiótico (doxiciclina dosis única). Aislamiento de pacientes con barreras higiénicas, cloración de excretas y vómitos, lavado de manos del personal. Comunicación a autoridad sanitaria en menos de 24 horas. Vacunación oral en zonas circundantes de alto riesgo. Letalidad esperada con manejo correcto es menor del 1 por ciento.",
+    "title_en": "Cholera — triage and outbreak management",
+    "content_en": "Cholera causes profuse watery diarrhea with rapid dehydration. Triage at the treatment center: A) No dehydration — outpatient ORS. B) Moderate dehydration — supervised ORS, 6-hour observation. C) Severe dehydration — Plan C, immediate IV, antibiotic (single-dose doxycycline). Patient isolation with hygiene barriers, chlorination of stools and vomit, staff handwashing. Report to health authority within 24 hours. Oral vaccination in surrounding high-risk areas. Expected case-fatality with correct management is below 1 percent."
+  },
+  {
+    "source": "Sphere Handbook 2018",
+    "section": "Shelter — minimum covered area",
+    "title_es": "Refugio — área cubierta mínima",
+    "content_es": "El estándar mínimo de área cubierta es 3.5 metros cuadrados por persona en clima cálido, aumentando a 4.5 metros cuadrados por persona en clima frío donde se cocina al interior. El refugio debe proteger de la lluvia, viento y temperatura, ofrecer privacidad, permitir ventilación cruzada y tener acceso seguro a letrinas y agua. Materiales deben ser localmente apropiados, durables al menos seis meses, e instalables por las propias familias. La distancia entre refugios debe permitir cortafuegos de al menos dos veces la altura del techo en asentamientos densos.",
+    "title_en": "Shelter — minimum covered area",
+    "content_en": "The minimum standard for covered area is 3.5 square meters per person in warm climate, increasing to 4.5 square meters per person in cold climate where cooking happens indoors. Shelter must protect from rain, wind, and temperature, offer privacy, allow cross-ventilation, and provide safe access to latrines and water. Materials must be locally appropriate, durable for at least six months, and installable by the families themselves. The distance between shelters must allow firebreaks of at least twice the roof height in dense settlements."
+  },
+  {
+    "source": "MSF Clinical Guidelines (open)",
+    "section": "Pediatric danger signs",
+    "title_es": "Signos de peligro en menor de 5 años",
+    "content_es": "Signos de peligro en niño menor de cinco años que requieren evacuación o atención inmediata: 1) Incapaz de beber o mamar. 2) Vómito persistente. 3) Convulsiones recientes o actuales. 4) Letargia o inconsciencia. 5) Estridor o respiración rápida (mayor a 50 por minuto entre 2 y 12 meses, mayor a 40 por minuto entre 1 y 5 años). 6) Tiraje subcostal severo. 7) Fiebre mayor a 39 grados con palidez. 8) Llenado capilar mayor a 3 segundos. La presencia de cualquiera de estos signos clasifica al niño como muy enfermo y obliga a referencia urgente.",
+    "title_en": "Danger signs in children under 5",
+    "content_en": "Danger signs in a child under five that require evacuation or immediate care: 1) Unable to drink or breastfeed. 2) Persistent vomiting. 3) Recent or current convulsions. 4) Lethargy or unconsciousness. 5) Stridor or fast breathing (above 50 per minute at 2-12 months, above 40 per minute at 1-5 years). 6) Severe lower chest wall indrawing. 7) Fever above 39 degrees with pallor. 8) Capillary refill above 3 seconds. Any of these signs classifies the child as very ill and requires urgent referral."
+  },
+  {
+    "source": "MSF Clinical Guidelines (open)",
+    "section": "Snake bite",
+    "title_es": "Mordedura de serpiente — manejo en campo",
+    "content_es": "Ante mordedura de serpiente: 1) Tranquilizar al paciente para reducir frecuencia cardíaca. 2) Inmovilizar la extremidad afectada por debajo del nivel del corazón. 3) No succionar, no incidir, no aplicar hielo ni torniquete. 4) Marcar el borde de la inflamación cada 15 minutos para evaluar progresión. 5) Retirar anillos, reloj y ropa apretada antes de que aumente la inflamación. 6) Evacuar a centro con suero antiofídico lo antes posible. 7) Anotar hora del accidente, descripción de la serpiente si es seguro, síntomas (sangrado, parálisis, ptosis, dolor). 8) Si hay paro respiratorio neurotóxico, ventilación asistida hasta llegada de antídoto.",
+    "title_en": "Snakebite — field management",
+    "content_en": "For snakebite: 1) Reassure the patient to lower heart rate. 2) Immobilize the affected limb below heart level. 3) Do not suck, do not cut, do not apply ice or tourniquet. 4) Mark the edge of swelling every 15 minutes to assess progression. 5) Remove rings, watch, and tight clothing before swelling increases. 6) Evacuate to a center with antivenom as soon as possible. 7) Record the time of the bite, description of the snake if safe, symptoms (bleeding, paralysis, ptosis, pain). 8) For neurotoxic respiratory arrest, ventilate manually until antivenom is administered."
+  },
+  {
+    "source": "Sphere — Health Promotion",
+    "section": "Outbreak prevention in shelters",
+    "title_es": "Prevención de brotes en albergues",
+    "content_es": "Medidas básicas para prevenir brotes en albergues colectivos: 1) Lavado de manos con agua y jabón antes de comer, tras usar letrina, tras tocar enfermos. 2) Cloración del agua almacenada a 0.2 a 0.5 mg/L residual libre. 3) Separación mínima de 2 metros entre camas y ventilación constante. 4) Gestión segura de residuos sólidos y excretas. 5) Tamizaje diario de fiebre, diarrea, tos persistente, sarpullido. 6) Aislamiento de casos sospechosos con barreras de tela y áreas designadas. 7) Notificación obligatoria a la autoridad sanitaria de agrupaciones de casos. 8) Vacunación masiva si se identifica brote de sarampión, cólera o meningitis.",
+    "title_en": "Outbreak prevention in shelters",
+    "content_en": "Basic measures to prevent outbreaks in collective shelters: 1) Handwashing with soap and water before eating, after latrine use, after contact with sick persons. 2) Chlorination of stored water at 0.2 to 0.5 mg/L free residual. 3) Minimum 2-meter spacing between beds and constant ventilation. 4) Safe management of solid waste and excreta. 5) Daily screening for fever, diarrhea, persistent cough, rash. 6) Isolation of suspected cases with fabric barriers and designated areas. 7) Mandatory notification of case clusters to health authority. 8) Mass vaccination if a measles, cholera, or meningitis outbreak is identified."
+  },
+  {
+    "source": "Sphere Handbook 2018",
+    "section": "Protection — gender-based violence",
+    "title_es": "Prevención de violencia basada en género",
+    "content_es": "Toda intervención humanitaria debe asumir que la violencia basada en género ocurre y mitigarla: 1) Iluminación de letrinas y caminos a zonas de baño. 2) Separación de letrinas por sexo con cerrojo interno. 3) Distribución de bienes a las familias con criterios que no obliguen a mujeres a viajar solas en horarios o rutas inseguras. 4) Espacios seguros para mujeres y niñas. 5) Referencia confidencial a servicios médicos, psicosociales y legales. 6) No exigir presentar denuncia para recibir atención médica. 7) Capacitar al personal en escucha sin juicio. La prevención no espera datos de incidencia; se asume baseline alto.",
+    "title_en": "Gender-based violence prevention",
+    "content_en": "All humanitarian intervention must assume that gender-based violence occurs and mitigate it: 1) Lighting of latrines and paths to bathing areas. 2) Sex-separated latrines with internal locks. 3) Distribution of goods to households with criteria that do not force women to travel alone at unsafe times or routes. 4) Safe spaces for women and girls. 5) Confidential referral to medical, psychosocial, and legal services. 6) Do not require filing a complaint to receive medical care. 7) Train staff in non-judgmental listening. Prevention does not wait for incidence data; a high baseline is assumed."
+  },
+  {
+    "source": "SAR Coordination Public Practice",
+    "section": "Search patterns",
+    "title_es": "Patrones de búsqueda terrestres",
+    "content_es": "Patrones básicos de búsqueda en superficie: 1) Patrón paralelo — equipo en línea con separación según visibilidad (10 metros en bosque denso, 30 a 50 metros en terreno abierto), avanzando juntos. Cobertura uniforme, ritmo alto. 2) Patrón en espiral expansiva — desde último punto conocido (LKP), girando en círculos crecientes. Útil cuando la persona puede haberse desplazado en cualquier dirección. 3) Patrón en cuadrícula — divide el área en sectores y un equipo cubre cada uno. Documentar inicio y fin de cada barrida. 4) Probabilidad de detección (POD) se reporta para cada barrido para priorizar re-búsqueda. La búsqueda nocturna requiere doble personal y luces térmicas.",
+    "title_en": "Ground search patterns",
+    "content_en": "Basic surface search patterns: 1) Parallel sweep — team in a line with spacing per visibility (10 m in dense forest, 30 to 50 m in open terrain), advancing together. Uniform coverage, fast pace. 2) Expanding spiral — from last known point (LKP), turning in growing circles. Useful when the person may have moved in any direction. 3) Grid pattern — divide the area into sectors and one team covers each. Document start and end of each sweep. 4) Probability of detection (POD) is reported for each sweep to prioritize re-search. Night search requires doubled personnel and thermal lights."
+  },
+  {
+    "source": "SAR Coordination Public Practice",
+    "section": "Coordinates and reporting",
+    "title_es": "Reporte de coordenadas en SAR",
+    "content_es": "Formato estándar para reportar una ubicación en SAR: grados decimales con seis decimales (precisión submétrica), siempre con el signo del hemisferio. Ejemplo: 9.748912, -83.753462. Reportar adicionalmente: 1) Datum (WGS84 por defecto). 2) Fuente del fix (GPS, mapa, estima). 3) Precisión estimada en metros. 4) Hora UTC. 5) Descripción cercana (referencia visible, kilómetro de carretera). Evitar grados-minutos-segundos por riesgo de error de transcripción en radio. Si solo hay UTM, transmitir letra de zona y banda (ej: 17N 528340 1077580).",
+    "title_en": "Coordinate reporting in SAR",
+    "content_en": "Standard format to report a location in SAR: decimal degrees with six decimals (submeter precision), always with hemisphere sign. Example: 9.748912, -83.753462. Also report: 1) Datum (WGS84 by default). 2) Fix source (GPS, map, dead reckoning). 3) Estimated precision in meters. 4) UTC time. 5) Nearby description (visible reference, road kilometer). Avoid degrees-minutes-seconds because of transcription error risk over radio. If only UTM is available, transmit zone letter and band (e.g., 17N 528340 1077580)."
+  },
+  {
+    "source": "WHO Mental Health in Emergencies",
+    "section": "Psychological first aid",
+    "title_es": "Primeros auxilios psicológicos",
+    "content_es": "Los primeros auxilios psicológicos (PAP) son una respuesta de apoyo a personas que han sufrido un evento traumático reciente. Tres pasos: OBSERVAR — evaluar seguridad, identificar quién necesita atención urgente. ESCUCHAR — acercarse, presentarse, escuchar sin presionar, validar sentimientos. CONECTAR — atender necesidades básicas (agua, abrigo, información), reunificar con familia, derivar a servicios. Lo que NO se hace: forzar a hablar del evento, prometer lo que no se puede cumplir, dar consejos no solicitados. PAP no es psicoterapia y puede ser ofrecido por personal no clínico capacitado.",
+    "title_en": "Psychological first aid",
+    "content_en": "Psychological first aid (PFA) is a supportive response to people who have suffered a recent traumatic event. Three steps: LOOK — assess safety, identify who needs urgent attention. LISTEN — approach, introduce yourself, listen without pressure, validate feelings. LINK — address basic needs (water, shelter, information), reunify with family, refer to services. What NOT to do: force talking about the event, make promises that cannot be kept, give unsolicited advice. PFA is not psychotherapy and can be offered by trained non-clinical staff."
+  },
+  {
+    "source": "ICRC First Aid Manual",
+    "section": "Choking",
+    "title_es": "Atragantamiento — obstrucción de vía aérea",
+    "content_es": "Adulto consciente con obstrucción severa (no puede toser, hablar ni respirar): 1) Cinco palmadas interescapulares con la palma abierta. 2) Si no resuelve, cinco compresiones abdominales (maniobra de Heimlich) en el punto medio entre apéndice xifoides y ombligo. 3) Alternar palmadas y compresiones hasta resolver o pérdida de consciencia. 4) Si pierde consciencia, iniciar reanimación cardiopulmonar comprobando boca antes de cada ventilación. En embarazada o muy obeso usar compresiones torácicas en lugar de abdominales. En lactante menor de un año: cinco palmadas en la espalda boca abajo seguidas de cinco compresiones torácicas boca arriba; nunca Heimlich.",
+    "title_en": "Choking — airway obstruction",
+    "content_en": "Conscious adult with severe obstruction (cannot cough, speak, or breathe): 1) Five interscapular back slaps with the open palm. 2) If not resolved, five abdominal thrusts (Heimlich maneuver) at the midpoint between xiphoid and navel. 3) Alternate slaps and thrusts until resolved or loss of consciousness. 4) If unconscious, start CPR checking the mouth before each ventilation. In pregnant or very obese patients use chest thrusts instead of abdominal. In an infant under one year: five back slaps face-down followed by five chest thrusts face-up; never Heimlich."
+  },
+  {
+    "source": "MSF Clinical Guidelines (open)",
+    "section": "Wound cleaning",
+    "title_es": "Limpieza de herida en campo",
+    "content_es": "Limpieza de herida sin acceso a quirófano: 1) Lavado de manos del rescatista, idealmente con guantes. 2) Irrigar con al menos 250 mL de solución salina 0.9 por ciento o agua potable hervida y enfriada. 3) Retirar cuerpos extraños superficiales con pinzas, no explorar profundamente herida en miembro. 4) Limpiar borde a centro con gasa empapada en clorhexidina o povidona. 5) Cobertura con gasa estéril seca, vendaje sin compresión arterial. 6) Profilaxis antitetánica si esquema incompleto o desconocido (toxoide y/o inmunoglobulina). 7) Antibiótico oral si la herida está contaminada, es por mordedura, o el cierre se retrasará más de 6 horas.",
+    "title_en": "Field wound cleaning",
+    "content_en": "Wound cleaning without surgical access: 1) Rescuer handwash, ideally with gloves. 2) Irrigate with at least 250 mL of 0.9 percent saline or boiled-cooled potable water. 3) Remove superficial foreign bodies with forceps; do not deeply explore limb wounds. 4) Clean edge to center with gauze soaked in chlorhexidine or povidone-iodine. 5) Cover with dry sterile gauze, non-constrictive bandage. 6) Tetanus prophylaxis if vaccination is incomplete or unknown (toxoid and/or immunoglobulin). 7) Oral antibiotic if the wound is contaminated, a bite, or closure will be delayed more than 6 hours."
+  },
+  {
+    "source": "Sphere Handbook 2018",
+    "section": "Information sharing",
+    "title_es": "Comunicación con la comunidad afectada",
+    "content_es": "La comunicación con la comunidad afectada es un derecho, no un favor. Mínimos: 1) Información disponible en idiomas y formatos accesibles (audio, gráfico, escrito en idioma local). 2) Canales bidireccionales — buzones, líneas telefónicas, encuestas, asambleas. 3) Respuesta a quejas en tiempos publicados, sin represalias. 4) Información sobre criterios de focalización, mecanismos de queja, comportamiento esperado del personal. 5) Datos personales protegidos según principios de minimización y consentimiento informado. 6) La rendición de cuentas a la población afectada es indicador de calidad de la respuesta, no opcional.",
+    "title_en": "Communication with affected community",
+    "content_en": "Communication with the affected community is a right, not a favor. Minimums: 1) Information available in accessible languages and formats (audio, graphic, written in local language). 2) Two-way channels — boxes, hotlines, surveys, assemblies. 3) Response to complaints within published timeframes, without retaliation. 4) Information about targeting criteria, complaint mechanisms, expected staff conduct. 5) Personal data protected following minimization and informed-consent principles. 6) Accountability to affected populations is a quality indicator of the response, not optional."
+  },
+  {
+    "source": "WHO Basic Emergency Care",
+    "section": "Spinal injury suspicion",
+    "title_es": "Sospecha de lesión espinal",
+    "content_es": "Sospechar lesión cervical o de columna ante: caída desde altura mayor a la propia, accidente vehicular a más de 50 km por hora, traumatismo en cabeza con alteración de consciencia, dolor de cuello o espalda tras trauma, debilidad o parestesia en extremidades, prioapismo. Manejo: 1) Mantener cabeza en posición neutra, manualmente alineada. 2) Movilizar al paciente solo si está en peligro inmediato. 3) Movimiento en bloque con tres rescatistas: cabeza, hombros-pelvis, piernas, sincrónicamente. 4) Colocar collarín rígido si está disponible, antes de cualquier traslado. 5) Transportar en tabla espinal o camilla rígida. 6) Vigilar respiración — la lesión cervical alta puede paralizar diafragma.",
+    "title_en": "Spinal injury suspicion",
+    "content_en": "Suspect cervical or spinal injury after: a fall from above one's own height, a vehicle accident above 50 km/h, head trauma with altered consciousness, neck or back pain after trauma, limb weakness or paresthesia, priapism. Management: 1) Keep the head in neutral position, manually aligned. 2) Move the patient only if in immediate danger. 3) Log-roll with three rescuers: head, shoulders-pelvis, legs, synchronously. 4) Apply a rigid collar if available, before any transfer. 5) Transport on a spinal board or rigid stretcher. 6) Monitor breathing — a high cervical injury can paralyze the diaphragm."
+  }
+]

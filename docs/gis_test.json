@@ -1,0 +1,44 @@
+{
+    "mapping_orders": [
+        {
+            "id": 1,
+            "question": "Mark the primary base camp and logistics staging area near the Faro a Colón. Coordinates: 18.4795, -69.8682."
+        },
+        {
+            "id": 2,
+            "question": "We need to establish an Incident Command Post (ICP) immediately at 18.4735, -69.8975."
+        },
+        {
+            "id": 3,
+            "question": "Set up a field medical post to receive casualties near Hospital Darío Contreras. Location is 18.4800, -69.8600."
+        },
+        {
+            "id": 4,
+            "question": "Add a structural hazard to the map. There is severe damage to the bridge structure at Puente Duarte: 18.4832, -69.8805."
+        },
+        {
+            "id": 5,
+            "question": "Mark a confirmed survivor pinned under debris in the Zona Colonial sector. Coordinates: 18.4750, -69.8835."
+        },
+        {
+            "id": 6,
+            "question": "Designate a helicopter Landing Zone (LZ) for emergency medevac operations inside the Estadio Olímpico. Coordinates are 18.4845, -69.9145."
+        },
+        {
+            "id": 7,
+            "question": "Record the last known position of a missing search team member near Parque del Este at 18.4745, -69.8500."
+        },
+        {
+            "id": 8,
+            "question": "Deploy a water distribution point for the civilian population near Plaza de la Bandera. Mark it at 18.4475, -69.9650."
+        },
+        {
+            "id": 9,
+            "question": "Warning: Chemical spill detected at an industrial facility at 18.4950, -69.9320. Mark as an active hazard."
+        },
+        {
+            "id": 10,
+            "question": "Add a secondary maritime evacuation point at the Puerto de Sans Souci: 18.4720, -69.8780."
+        }
+    ]
+}

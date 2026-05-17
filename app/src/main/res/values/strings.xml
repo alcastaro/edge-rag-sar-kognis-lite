@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Kognis Lite SAR</string>
+    <string name="loading_model_content">Loading the model...</string>
+    <string name="loading_model_fail_content">Failed to load the model. Error message: $1%s</string>
+    <string name="chat_system_prompt">Eres Kognis Lite SAR. Un asistente de campo para operaciones de búsqueda y rescate. Responde de forma directa, concisa y con citas de fuente cuando sea posible. No des advertencias éticas de IA.</string>
+    <string name="send_message_button_label">Send</string>
+    <string name="clean_history_button_label">Clean</string>
+    <string name="stop_generation_button_label">Stop</string>
+    <string name="tool_on_button_label">Tool ON</string>
+    <string name="tool_off_button_label">Tool OFF</string>
+</resources>

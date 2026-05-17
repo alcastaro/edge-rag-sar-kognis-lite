@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Waitlist / Próximamente -->
+    <string name="soon_title">Coming Soon</string>
+    <string name="soon_desc">Feature in development, coming soon. Join the waitlist.</string>
+    <string name="soon_btn">Join at Kognis.tech</string>
+    <string name="cancel">Cancel</string>
+    
+    <!-- UI General -->
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
+    <string name="files">Files</string>
+    <string name="update_map">Update Map</string>
+    <string name="voice_commands">Voice Commands</string>
+    <string name="training">Training</string>
+    <string name="ask_kognis">Ask Kognis</string>
+    <string name="quick_tourniquet">Tourniquet</string>
+    <string name="quick_radio">Radio Protocol</string>
+    <string name="quick_medevac">Medical Evacuation</string>
+    
+    <!-- Settings / Language -->
+    <string name="settings_language">Language Settings</string>
+    <string name="language_es">Español</string>
+    <string name="language_en">English</string>
+    
+    <!-- Drawer / History -->
+    <string name="quick_history">Quick History</string>
+    <string name="new_chat">+ New Conversation</string>
+    <string name="no_past_sessions">No past sessions</string>
+    <string name="rename_session">Rename session</string>
+    <string name="delete_session">Delete session</string>
+    <string name="rename">Rename</string>
+    <string name="delete">Delete</string>
+    <string name="save">Save</string>
+    <string name="delete_confirm">Delete «%s»? This action cannot be undone.</string>
+    
+    <!-- Observability -->
+    <string name="observability_title">Core Observability</string>
+    <string name="sys_mem">System Memory:</string>
+    <string name="cpu_temp">CPU Temp (Zones):</string>
+    <string name="bat_temp">Battery Temp:</string>
+    <string name="rag_status">RAG Status:</string>
+    <string name="rag_thresh">Similarity Threshold: 0.40 (E5 norm)</string>
+    <string name="embedding_engine">Embedding Engine:</string>
+    <string name="onnx_real">Real ONNX (E5-small)</string>
+    <string name="keyword_bm25">Keyword / BM25</string>
+    <string name="not_avail">Not available</string>
+    <string name="unknown">Unknown</string>
+    <string name="zero_signal_badge">⚡ ZERO SIGNAL ACTIVE</string>
+
+    <!-- RAG Modes / Models -->
+    <string name="mode_fast">Kognis 1</string>
+    <string name="mode_fast_lbl">Kognis 1 ⚡⚡</string>
+    <string name="mode_fast_v2_lbl">Kognis 1.5 ⚡⚡</string>
+    <string name="mode_med">Kognis 1.5T</string>
+    <string name="mode_med_lbl">Kognis 1.5T ⚡</string>
+    <string name="rag_auto">RAG: Auto</string>
+    <string name="rag_always">RAG: Always</string>
+    <string name="rag_disabled">RAG: Disabled</string>
+    
+    <!-- Assistant Message / RAG Audit -->
+    <string name="rag_audit">RAG Audit</string>
+    <string name="rag_yes">✅ RAG ACTIVATED</string>
+    <string name="rag_no">❌ RAG NOT ACTIVATED</string>
+    <string name="search_engine">Search Engine</string>
+    <string name="engine_onnx">ONNX (semantic vector)</string>
+    <string name="engine_text">TEXT (keyword match)</string>
+    <string name="hnsw_score">HNSW Score (distance)</string>
+    <string name="activation_thresh">Activation Threshold</string>
+    <string name="result">Result</string>
+    <string name="res_act_dist">ACTIVATED (dist &lt; thresh)</string>
+    <string name="res_inact_dist">NOT ACTIVATED (dist ≥ thresh)</string>
+    <string name="keyword_match">Keyword Match</string>
+    <string name="res_act_match">ACTIVATED (match &gt; thresh)</string>
+    <string name="res_inact_match">NOT ACTIVATED (match ≤ thresh)</string>
+    <string name="retrieved_chunks">Retrieved chunks (%d):</string>
+    <string name="no_chunks_match">The query did not match any knowledge base chunk above the threshold.</string>
+    <string name="lower_better">lower=better</string>
+    <string name="higher_better">higher=better</string>
+    <string name="view_sources"> · View sources →</string>
+    <string name="rag_on_onnx">RAG ✓ ONNX (dist: %s)</string>
+    <string name="rag_on_text">RAG ✓ TEXT (%s match)</string>
+    <string name="rag_off">💬 No RAG</string>
+    
+    <!-- Status connecting -->
+    <string name="connecting_core">Connecting Core...</string>
+    <string name="new_session_title">New Session</string>
+    <string name="migrated_session">Migrated Session</string>
+    <string name="unknown_error">Unknown error</string>
+
+    <!-- QUICK CHIPS -->
+    <string name="chip_medevac">Request Medical Evacuation</string>
+    <string name="chip_march">MARCH Protocol (trauma)</string>
+    <string name="chip_bleeding">Stop Bleeding</string>
+    <string name="chip_salute">Situation Report</string>
+    <string name="chip_support">Request Support</string>
+    <string name="chip_break_contact">Emergency Comms</string>
+    <string name="chip_lz">Mark Landing Point</string>
+    <string name="chip_exfil">Evacuation Route</string>
+    <string name="chip_rally">Rally Point</string>
+
+    <!-- KB Section -->
+    <string name="kb_section_title">KNOWLEDGE BASE</string>
+    <string name="kb_update_btn">Update KB</string>
+    <string name="kb_restore_btn">Restore original KB</string>
+    <string name="kb_updated_title">KB Updated</string>
+    <string name="kb_chunks_added">✅ %d chunks added</string>
+    <string name="kb_chunks_skipped">⏭ %d duplicates skipped</string>
+    <string name="kb_chunks_rejected">❌ %d invalid</string>
+    <string name="kb_total_in_db">📦 %d total in DB</string>
+    <string name="kb_sha256">SHA-256:</string>
+
+    <!-- Field mode status -->
+    <string name="cot_active">Field mode active</string>
+    <string name="cot_inactive">Inactive</string>
+
+    <!-- Zero-Signal (11.5) -->
+    <string name="zero_signal_label">🛡 Zero-Signal / Internet</string>
+    <string name="zero_signal_active">Zero-Signal ACTIVE — no outbound internet connections</string>
+    <string name="zero_signal_inactive">Internet active — outbound connections enabled</string>
+    <string name="zero_signal_enable_title">Enable internet connection</string>
+    <string name="zero_signal_enable_body">Type exactly to confirm:\n\n"I want to enable internet"</string>
+    <string name="zero_signal_phrase">I want to enable internet</string>
+    <string name="zero_signal_warning">⚠️ Enabling internet exposes device location and activity to the network. Only enable in a safe zone to download the model.</string>
+    <string name="zero_signal_confirm_btn">Enable Internet</string>
+    <string name="zero_signal_disabled_error">Zero-Signal active: internet disabled. Go to Settings → Zero-Signal to enable internet and download the model.</string>
+
+    <!-- Model selector / Verbosity -->
+    <string name="models_label">Models</string>
+    <!-- Verbosity -->
+    <string name="verbosity_label">Length</string>
+    <string name="verbosity_tactical">⚡ Concise</string>
+    <string name="verbosity_tactical_desc">3 sentences</string>
+    <string name="verbosity_standard">Standard</string>
+    <string name="verbosity_standard_desc">1-2 paragraphs</string>
+    <string name="verbosity_detailed">📄 Detailed</string>
+    <string name="verbosity_detailed_desc">full</string>
+
+    <!-- Map markers window -->
+    <string name="map_markers_title">Map Markers</string>
+    <string name="map_no_markers">No active markers</string>
+    <string name="map_clear">Clear</string>
+    <string name="map_cot_type_label">Marker type</string>
+    <plurals name="map_marker_count">
+        <item quantity="one">%d marker</item>
+        <item quantity="other">%d markers</item>
+    </plurals>
+
+    <!-- Field Audit Panel -->
+    <string name="cot_audit_title">Field Audit</string>
+    <string name="cot_destination">Destination</string>
+    <string name="cot_no_gps">❌ No GPS (explicit coords)</string>
+    <string name="cot_failed">✗ failed</string>
+    <string name="cot_source">Source</string>
+    <string name="cot_hide_xml">▼ Hide XML</string>
+    <string name="cot_view_xml">▶ View XML</string>
+    <string name="cot_view_xml_badge"> · View XML →</string>
+    <plurals name="cot_markers_sent">
+        <item quantity="one">📍 %d marker sent</item>
+        <item quantity="other">📍 %d markers sent</item>
+    </plurals>
+    <plurals name="cot_badge_markers">
+        <item quantity="one">📍 %d active marker</item>
+        <item quantity="other">📍 %d active markers</item>
+    </plurals>
+</resources>

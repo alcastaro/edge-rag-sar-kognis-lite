@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <external-files-path name="performance" path="performance/" />
+    <external-files-path name="feedback" path="feedback/" />
+    <external-files-path name="test_results" path="test_results/" />
+    <external-files-path name="gpx" path="gpx/" />
+    <external-files-path name="markers" path="markers/" />
+</paths>

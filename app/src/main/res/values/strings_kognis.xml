@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Waitlist / Próximamente -->
+    <string name="soon_title">Próximamente</string>
+    <string name="soon_desc">Funcionalidad en desarrollo, disponible próximamente. Regístrate en la lista de espera.</string>
+    <string name="soon_btn">Únete en Kognis.tech</string>
+    <string name="cancel">Cancelar</string>
+    
+    <!-- UI General -->
+    <string name="camera">Cámara</string>
+    <string name="gallery">Galería</string>
+    <string name="files">Archivos</string>
+    <string name="update_map">Actualizar mapa</string>
+    <string name="voice_commands">Comandos por voz</string>
+    <string name="training">Capacitación</string>
+    <string name="ask_kognis">Ask Kognis</string>
+    <string name="quick_tourniquet">Torniquete</string>
+    <string name="quick_radio">Protocolo de Radio</string>
+    <string name="quick_medevac">Evacuación Médica</string>
+    
+    <!-- Settings / Language -->
+    <string name="settings_language">Ajustes de Idioma</string>
+    <string name="language_es">Español</string>
+    <string name="language_en">English</string>
+    
+    <!-- Drawer / History -->
+    <string name="quick_history">Historial Rápido</string>
+    <string name="new_chat">+ Nueva Conversación</string>
+    <string name="no_past_sessions">No hay sesiones pasadas</string>
+    <string name="rename_session">Renombrar sesión</string>
+    <string name="delete_session">Eliminar sesión</string>
+    <string name="rename">Renombrar</string>
+    <string name="delete">Eliminar</string>
+    <string name="save">Guardar</string>
+    <string name="delete_confirm">¿Eliminar «%s»? Esta acción no se puede deshacer.</string>
+    
+    <!-- Observability -->
+    <string name="observability_title">Observabilidad Core</string>
+    <string name="sys_mem">Memoria del Sistema:</string>
+    <string name="cpu_temp">Temperatura CPU (Zonas):</string>
+    <string name="bat_temp">Temperatura Batería:</string>
+    <string name="rag_status">Estado RAG:</string>
+    <string name="rag_thresh">Umbral de Similitud: 0.40 (E5 normalizado)</string>
+    <string name="embedding_engine">Motor de Embeddings:</string>
+    <string name="onnx_real">ONNX Real (E5-small)</string>
+    <string name="keyword_bm25">Keyword / BM25</string>
+    <string name="not_avail">No disponible</string>
+    <string name="unknown">Desconocido</string>
+    <string name="zero_signal_badge">⚡ ZERO SIGNAL ACTIVE</string>
+
+    <!-- RAG Modes / Models -->
+    <string name="mode_fast">Kognis 1</string>
+    <string name="mode_fast_lbl">Kognis 1 ⚡⚡</string>
+    <string name="mode_fast_v2_lbl">Kognis 1.5 ⚡⚡</string>
+    <string name="mode_med">Kognis 1.5T</string>
+    <string name="mode_med_lbl">Kognis 1.5T ⚡</string>
+    <string name="rag_auto">RAG: Auto</string>
+    <string name="rag_always">RAG: Siempre</string>
+    <string name="rag_disabled">RAG: Desactivado</string>
+    
+    <!-- Assistant Message / RAG Audit -->
+    <string name="rag_audit">Auditoría RAG</string>
+    <string name="rag_yes">✅ RAG ACTIVADO</string>
+    <string name="rag_no">❌ RAG NO ACTIVADO</string>
+    <string name="search_engine">Motor de Búsqueda</string>
+    <string name="engine_onnx">ONNX (vectorial semántico)</string>
+    <string name="engine_text">TEXTO (keyword match)</string>
+    <string name="hnsw_score">Score HNSW (distancia)</string>
+    <string name="activation_thresh">Umbral de activación</string>
+    <string name="result">Resultado</string>
+    <string name="res_act_dist">ACTIVADO (dist &lt; umbral)</string>
+    <string name="res_inact_dist">NO ACTIVADO (dist ≥ umbral)</string>
+    <string name="keyword_match">Coincidencia de Keywords</string>
+    <string name="res_act_match">ACTIVADO (match &gt; umbral)</string>
+    <string name="res_inact_match">NO ACTIVADO (match ≤ umbral)</string>
+    <string name="retrieved_chunks">Chunks recuperados (%d):</string>
+    <string name="no_chunks_match">La consulta no coincidió con ningún chunk de la KB.</string>
+    <string name="lower_better">menor=mejor</string>
+    <string name="higher_better">mayor=mejor</string>
+    <string name="view_sources"> · Ver fuentes →</string>
+    <string name="rag_on_onnx">RAG ✓ ONNX (dist: %s)</string>
+    <string name="rag_on_text">RAG ✓ TEXTO (%s match)</string>
+    <string name="rag_off">💬 Sin RAG</string>
+    
+    <!-- Status connecting -->
+    <string name="connecting_core">Conectando Core...</string>
+    <string name="new_session_title">Nueva Sesión</string>
+    <string name="migrated_session">Sesión Migrada</string>
+    <string name="unknown_error">Error desconocido</string>
+
+    <!-- QUICK CHIPS -->
+    <string name="chip_medevac">Solicitar Evacuación Médica</string>
+    <string name="chip_march">Protocolo MARCH (trauma)</string>
+    <string name="chip_bleeding">Detener Hemorragia</string>
+    <string name="chip_salute">Reporte de Situación</string>
+    <string name="chip_support">Solicitar Apoyo</string>
+    <string name="chip_break_contact">Comunicación de Emergencia</string>
+    <string name="chip_lz">Marcar Punto de Aterrizaje</string>
+    <string name="chip_exfil">Ruta de Evacuación</string>
+    <string name="chip_rally">Punto de Reunión</string>
+
+    <!-- KB Section -->
+    <string name="kb_section_title">BASE DE CONOCIMIENTO</string>
+    <string name="kb_update_btn">Actualizar KB</string>
+    <string name="kb_restore_btn">Restaurar KB original</string>
+    <string name="kb_updated_title">KB Actualizada</string>
+    <string name="kb_chunks_added">✅ %d chunks añadidos</string>
+    <string name="kb_chunks_skipped">⏭ %d duplicados ignorados</string>
+    <string name="kb_chunks_rejected">❌ %d inválidos</string>
+    <string name="kb_total_in_db">📦 %d total en DB</string>
+    <string name="kb_sha256">SHA-256:</string>
+
+    <!-- Field mode status -->
+    <string name="cot_active">Modo campo activo</string>
+    <string name="cot_inactive">Inactivo</string>
+
+    <!-- Zero-Signal (11.5) -->
+    <string name="zero_signal_label">🛡 Zero-Signal / Internet</string>
+    <string name="zero_signal_active">Zero-Signal ACTIVO — sin conexiones salientes al exterior</string>
+    <string name="zero_signal_inactive">Internet activo — conexiones salientes habilitadas</string>
+    <string name="zero_signal_enable_title">Activar conexión a internet</string>
+    <string name="zero_signal_enable_body">Escribe exactamente para confirmar:\n\n"Quiero activar el internet"</string>
+    <string name="zero_signal_phrase">Quiero activar el internet</string>
+    <string name="zero_signal_warning">⚠️ Activar internet expone la ubicación y actividad del dispositivo a la red. Solo actívalo en zona segura para descargar el modelo.</string>
+    <string name="zero_signal_confirm_btn">Activar Internet</string>
+    <string name="zero_signal_disabled_error">Zero-Signal activo: internet desactivado. Ve a Ajustes → Zero-Signal para activar internet y descargar el modelo.</string>
+
+    <!-- Model selector / Verbosity -->
+    <string name="models_label">Modelos</string>
+    <!-- Verbosity -->
+    <string name="verbosity_label">Longitud</string>
+    <string name="verbosity_tactical">⚡ Conciso</string>
+    <string name="verbosity_tactical_desc">3 frases</string>
+    <string name="verbosity_standard">Estándar</string>
+    <string name="verbosity_standard_desc">1-2 párrafos</string>
+    <string name="verbosity_detailed">📄 Detallado</string>
+    <string name="verbosity_detailed_desc">completo</string>
+
+    <!-- Map markers window -->
+    <string name="map_markers_title">Marcadores de Mapa</string>
+    <string name="map_no_markers">Sin marcadores activos</string>
+    <string name="map_clear">Limpiar</string>
+    <string name="map_cot_type_label">Tipo de marcador</string>
+    <plurals name="map_marker_count">
+        <item quantity="one">%d marcador</item>
+        <item quantity="other">%d marcadores</item>
+    </plurals>
+
+    <!-- Field Audit Panel -->
+    <string name="cot_audit_title">Auditoría de Campo</string>
+    <string name="cot_destination">Destino</string>
+    <string name="cot_no_gps">❌ Sin GPS (coords explícitas)</string>
+    <string name="cot_failed">✗ falló</string>
+    <string name="cot_source">Fuente</string>
+    <string name="cot_hide_xml">▼ Ocultar XML</string>
+    <string name="cot_view_xml">▶ Ver XML</string>
+    <string name="cot_view_xml_badge"> · Ver XML →</string>
+    <plurals name="cot_markers_sent">
+        <item quantity="one">📍 %d marcador enviado</item>
+        <item quantity="other">📍 %d marcadores enviados</item>
+    </plurals>
+    <plurals name="cot_badge_markers">
+        <item quantity="one">📍 %d marcador activo</item>
+        <item quantity="other">📍 %d marcadores activos</item>
+    </plurals>
+</resources>

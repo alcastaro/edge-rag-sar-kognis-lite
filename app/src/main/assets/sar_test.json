@@ -1,0 +1,206 @@
+{
+  "multi_chunk_questions": [
+    {
+      "id": 1,
+      "question": "Given the structural capabilities of Light, Medium, and Heavy USAR teams, how does the capacity for lifting loads manually and mechanically scale across the classifications?"
+    },
+    {
+      "id": 2,
+      "question": "If an UNDAC team discovers a chemical spill during an earthquake response, what specific steps must the non-expert team members take, and how does this relate to the Environmental Emergencies Coordination Cell?"
+    },
+    {
+      "id": 3,
+      "question": "Compare the primary operational responsibilities of the USAR Coordination Cell (UCC) Manager with those of the Reception/Departure Centre (RDC) Manager during the initial phases of a disaster."
+    },
+    {
+      "id": 4,
+      "question": "How do the four core components of inter-organizational trust influence the way an UNDAC team should initially engage with local partner agencies and establish coordination?"
+    },
+    {
+      "id": 5,
+      "question": "If the Local Emergency Management Authority (LEMA) tasks a USAR team to an operation that contradicts the INSARAG triage scale of survivability, how should the team and the UCC respond based on the guidelines?"
+    },
+    {
+      "id": 6,
+      "question": "Describe the complete process for converting Degrees and Decimal Minutes (DDD° MM.mmm) into Degrees Decimal (DDD.dddd°) and explain why this specific format is mandated by INSARAG."
+    },
+    {
+      "id": 7,
+      "question": "What is the difference in how the \"Staff only\", \"Team only\", and \"Publicly displayed\" information boards are utilized within an established Reception/Departure Centre (RDC)?"
+    },
+    {
+      "id": 8,
+      "question": "In the context of the MIRA process, how does the \"good-enough\" approach during Phase II differ from the data collection expectations in Phase III of a large-scale emergency?"
+    },
+    {
+      "id": 9,
+      "question": "Trace the required data components from the completion of the Victim Extrication Form to its integration into the Incident/Sector Situation Report."
+    },
+    {
+      "id": 10,
+      "question": "Explain how the UNDAC team coordinates with the World Food Programme (WFP) and the Logistics Cluster from the initial arrival of the Logistics Response Team (LRT) to the execution of the logistics program."
+    },
+    {
+      "id": 11,
+      "question": "Compare the operational focus and meeting types required during the \"Storming\" phase of team development versus those needed in the \"Performing\" phase."
+    },
+    {
+      "id": 12,
+      "question": "How does the OSOCC's mandate to act as a \"provider of last resort\" apply to the activation and functionality of the Logistics Cluster?"
+    },
+    {
+      "id": 13,
+      "question": "Describe the step-by-step procedure for operating a BGAN terminal, including environmental considerations and the specific bandwidth management protocols required."
+    },
+    {
+      "id": 14,
+      "question": "How does the Humanitarian Programme Cycle (HPC) dictate the evolution of the Flash Appeal into a long-term Humanitarian Response Plan (HRP), and what is the maximum duration for each?"
+    },
+    {
+      "id": 15,
+      "question": "If an Emergency Medical Team (EMT) arrives unannounced and fails to register at the EMTCC, what is the protocol for the UNDAC team, and who holds the ultimate authority to sanction them?"
+    },
+    {
+      "id": 16,
+      "question": "According to the guidelines, how should a facilitator use Open Neutral, Closed Neutral, Open Biased, and Closed Biased questions to steer a stalled coordination meeting?"
+    },
+    {
+      "id": 17,
+      "question": "What specific operational data points are required to populate both the Team Availability List and the Priority Assignment List during the worksite prioritization process?"
+    },
+    {
+      "id": 18,
+      "question": "Explain the hierarchical relationship and differences in reporting structure between the UN Department of Safety and Security (UNDSS), the Designated Official (DO), and the Chief Security Advisor (CSA) at the country level."
+    },
+    {
+      "id": 19,
+      "question": "How do the requirements for a Structural Engineer on a USAR team differ from those of a Rigging Specialist regarding building stabilization and heavy lifting?"
+    },
+    {
+      "id": 20,
+      "question": "Compare the procedures and goals of \"Defusing\" versus \"Psychological First Aid\" when managing critical incident stress among mission staff."
+    },
+    {
+      "id": 21,
+      "question": "Detail the specific logistical and spatial requirements (in square meters) needed to establish a base camp for 25 people with 10 vehicles."
+    },
+    {
+      "id": 22,
+      "question": "What is the protocol for integrating regional disaster mechanisms like the ASEAN ERAT or CDEMA RNAT into the UN's OSOCC structure to prevent \"silo-thinking\"?"
+    },
+    {
+      "id": 23,
+      "question": "If a team member is required to use a handheld satellite telephone inside a concrete building, what technical limitations will they face, and what alternatives does the manual suggest?"
+    },
+    {
+      "id": 24,
+      "question": "How should an UNDAC Information Management (IM) Cell handle the distribution of sensitive data versus data that benefits the whole humanitarian community?"
+    },
+    {
+      "id": 25,
+      "question": "Explain the distinction between a \"Joint assessment\" and a \"Harmonized assessment\" as defined by the IASC Operational Guidance."
+    },
+    {
+      "id": 26,
+      "question": "What are the specific requirements for requesting an Emergency Cash Grant, and how does this mechanism differ from the Central Emergency Response Fund (CERF)?"
+    },
+    {
+      "id": 27,
+      "question": "Describe the sequence of actions an UNDAC team must take if they encounter a severely dehydrated team member who has had diarrhea for two days in the field without professional medical help."
+    },
+    {
+      "id": 28,
+      "question": "How does the operational structure of an OSOCC change when transitioning from Phase I (virtual activation) to Phase II (on-site arrival) during a large-scale emergency?"
+    },
+    {
+      "id": 29,
+      "question": "What specific details must be included in the \"Response strategy\" and \"Sector strategies\" sections of a Flash Appeal document?"
+    },
+    {
+      "id": 30,
+      "question": "If an international military force is deployed to assist in disaster relief, what five specific steps must the UN-CMCoord assessment take to determine the appropriate liaison strategy?"
+    }
+  ],
+  "hallucination_testing_questions": [
+    {
+      "id": 1,
+      "question": "What is the exact maximum weight capacity (in kilograms) for the standard UNDAC issued BGAN terminal carrying case?"
+    },
+    {
+      "id": 2,
+      "question": "According to the UNDAC handbook, what specific brand of water purification tablets is mandated for use in the field medical kits?"
+    },
+    {
+      "id": 3,
+      "question": "If a Heavy USAR team is deploying to a Level 5 radiation zone, what specific protective suits are required by the INSARAG guidelines?"
+    },
+    {
+      "id": 4,
+      "question": "How much does OCHA charge national governments to deploy an UNDAC team for a standard two-week mission?"
+    },
+    {
+      "id": 5,
+      "question": "What is the maximum number of days a UN-CMCoord officer is legally allowed to embed directly with an active combat unit?"
+    },
+    {
+      "id": 6,
+      "question": "According to the INSARAG guidelines, what is the exact radio frequency (in MHz) reserved exclusively for communication between the RDC and the UCC?"
+    },
+    {
+      "id": 7,
+      "question": "If the OSOCC Manager falls ill, which specific UN agency automatically assumes interim command of the facility?"
+    },
+    {
+      "id": 8,
+      "question": "What are the required dimensions (length and width) for the designated helicopter landing pad inside an OSOCC base camp?"
+    },
+    {
+      "id": 9,
+      "question": "According to the manual, what specific software program must the GIS expert use to create the 3W (Who is doing What and Where) maps?"
+    },
+    {
+      "id": 10,
+      "question": "How many hours of direct tactical combat training must an UNDAC Team Leader complete before deploying to a complex emergency?"
+    },
+    {
+      "id": 11,
+      "question": "What is the exact penalty or fine imposed by the MoH on an international EMT that fails to submit their final departure report?"
+    },
+    {
+      "id": 12,
+      "question": "According to the guidelines, what specific psychological test must be administered during the \"Exploration phase\" of a defusing session?"
+    },
+    {
+      "id": 13,
+      "question": "Which specific model of Thuraya satellite phone is issued as standard equipment in the IHP service package?"
+    },
+    {
+      "id": 14,
+      "question": "If a USAR dog handler is injured, what is the protocol for transferring ownership of the search dog to the local LEMA?"
+    },
+    {
+      "id": 15,
+      "question": "What is the exact mathematical formula used by the Logistics Cluster to forecast commercial supply chain demand in a disaster?"
+    },
+    {
+      "id": 16,
+      "question": "Under the FRANZ agreement, which specific New Zealand military vessels are pre-approved for deploying UNDAC teams to the Pacific Islands?"
+    },
+    {
+      "id": 17,
+      "question": "What is the maximum number of characters allowed in the \"Map description\" field when requesting a map via the VOSOCC platform?"
+    },
+    {
+      "id": 18,
+      "question": "If an UNDAC member loses their passport in the field, what specific UN form number must be filed with the local embassy?"
+    },
+    {
+      "id": 19,
+      "question": "According to the manual, what is the exact dosage of antibiotics recommended for treating Schistosomiasis (snail fever) in the field?"
+    },
+    {
+      "id": 20,
+      "question": "Which private sector telecommunications company holds the exclusive global contract to provide WiFi routers for OSOCC tents?"
+    }
+  ]
+}
