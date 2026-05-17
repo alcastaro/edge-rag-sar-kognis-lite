@@ -355,13 +355,27 @@ class MainActivity : ComponentActivity() {
     @Volatile internal var skillCallback: ((io.kognis.tactical.core.learning.LearningSkill) -> Unit)? = null
     /** Set by the Composable so sendText() can dismiss prior quiz/case cards on a new user turn. */
     @Volatile internal var dismissTrainingCards: (() -> Unit)? = null
+    /** Set by the Composable to receive streaming-side skill name detection. */
+    @Volatile internal var skillLoadingCallback: ((String?) -> Unit)? = null
+
+    private val SKILL_NAME_REGEX = Regex("""(?i)SKILL\s*:\s*\{[^}]*"name"\s*:\s*"([a-z_]+)""")
+    private var lastDetectedSkill: String? = null
 
     private val fieldCallback = object : IFieldCallback.Stub() {
         override fun onTokenRetrieved(token: String) {
             android.util.Log.d("MainActivity", "onTokenRetrieved: ${token.length} chars")
             if (evalDeferred != null) evalBuffer.append(token)
             if (ttsEnabled) ttsBuffer.append(token)
-            if (skillCallback != null) skillBuffer.append(token)
+            if (skillCallback != null) {
+                skillBuffer.append(token)
+                // Streaming detection: surface skill name as soon as "name":"..." appears.
+                if (lastDetectedSkill == null) {
+                    SKILL_NAME_REGEX.find(skillBuffer)?.groupValues?.getOrNull(1)?.let { name ->
+                        lastDetectedSkill = name
+                        runOnUiThread { skillLoadingCallback?.invoke(name) }
+                    }
+                }
+            }
             runOnUiThread {
                 appendToLastAssistantMessage(token)
             }
@@ -381,6 +395,9 @@ class MainActivity : ComponentActivity() {
             } else {
                 ttsBuffer.clear()
             }
+            // Clear streaming loading state — final parsing below renders the actual card.
+            lastDetectedSkill = null
+            runOnUiThread { skillLoadingCallback?.invoke(null) }
             // Parse SKILL: tag from the assistant's final text — used to render QuizCard / CaseStudyCard
             if (skillCallback != null && skillBuffer.isNotEmpty()) {
                 val text = skillBuffer.toString()
@@ -913,6 +930,8 @@ class MainActivity : ComponentActivity() {
         // The most recent quiz/case-study card to render below the chat
         var pendingQuiz by remember { mutableStateOf<io.kognis.tactical.core.learning.LearningSkill.QuizUser?>(null) }
         var pendingCase by remember { mutableStateOf<io.kognis.tactical.core.learning.LearningSkill.ShowExample?>(null) }
+        // Mid-stream skill detection — populated as soon as `"name":"..."` parses inside the streaming token buffer.
+        var loadingSkillName by remember { mutableStateOf<String?>(null) }
         // Register the skill callback once — fired by fieldCallback.onGenerationComplete.
         DisposableEffect(Unit) {
             this@MainActivity.skillCallback = { skill ->
@@ -923,10 +942,12 @@ class MainActivity : ComponentActivity() {
                     is io.kognis.tactical.core.learning.LearningSkill.ReviewPastMisses -> { /* handled in next turn's prompt */ }
                 }
             }
-            this@MainActivity.dismissTrainingCards = { pendingQuiz = null; pendingCase = null }
+            this@MainActivity.dismissTrainingCards = { pendingQuiz = null; pendingCase = null; loadingSkillName = null }
+            this@MainActivity.skillLoadingCallback = { name -> loadingSkillName = name }
             onDispose {
                 this@MainActivity.skillCallback = null
                 this@MainActivity.dismissTrainingCards = null
+                this@MainActivity.skillLoadingCallback = null
             }
         }
         // Voice input agent state — on-device speech-to-text (SpeechRecognizer)
@@ -2043,6 +2064,32 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                                 
+                                // Streaming indicator — chip appears as soon as `SKILL:{"name":"..."}` arrives.
+                                loadingSkillName?.let { name ->
+                                    val label = when (name) {
+                                        "show_example" -> "📖 Loading case study…"
+                                        "quiz_user" -> "📝 Building quiz…"
+                                        "review_past_misses" -> "🔁 Reviewing past misses…"
+                                        "mark_mastery" -> "✅ Updating mastery…"
+                                        else -> "🛠 Loading skill: $name"
+                                    }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp)
+                                            .background(androidx.compose.ui.graphics.Color(0xFF1A1A1A), RoundedCornerShape(8.dp))
+                                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        androidx.compose.material3.CircularProgressIndicator(
+                                            modifier = Modifier.size(14.dp),
+                                            strokeWidth = 2.dp,
+                                            color = io.kognis.tactical.ui.theme.RescueAmber,
+                                        )
+                                        Spacer(Modifier.width(10.dp))
+                                        Text(label, color = io.kognis.tactical.ui.theme.RescueAmber, fontSize = 12.sp)
+                                    }
+                                }
                                 // Training-mode cards: rendered above the input when present
                                 pendingCase?.let { case ->
                                     val mod = remember(case.topic) {
