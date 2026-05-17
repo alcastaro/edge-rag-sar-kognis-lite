@@ -18,14 +18,40 @@ object SkillCallExtractor {
 
     private const val TAG = "SkillCallExtractor"
 
-    private val PATTERN = Regex(
-        """(?i)SKILL\s*:\s*(\{[^{}]*\})""",
-        setOf(RegexOption.DOT_MATCHES_ALL),
-    )
+    /**
+     * Brace-counting JSON extractor — replaces the naive `\{[^{}]*\}` regex which
+     * truncates when a string value contains `}`. Walks the text character-by-
+     * character tracking depth + string state + escapes. Returns the full JSON
+     * object substring after `SKILL:` or null.
+     */
+    private fun extractJsonAfterSkill(text: String): String? {
+        val skillIdx = text.indexOf("SKILL", ignoreCase = true)
+        if (skillIdx < 0) return null
+        val colonIdx = text.indexOf(':', skillIdx)
+        if (colonIdx < 0) return null
+        val openIdx = text.indexOf('{', colonIdx)
+        if (openIdx < 0) return null
+        var depth = 0
+        var inString = false
+        var escape = false
+        for (i in openIdx until text.length) {
+            val c = text[i]
+            when {
+                escape -> escape = false
+                inString && c == '\\' -> escape = true
+                c == '"' -> inString = !inString
+                !inString && c == '{' -> depth++
+                !inString && c == '}' -> {
+                    depth--
+                    if (depth == 0) return text.substring(openIdx, i + 1)
+                }
+            }
+        }
+        return null
+    }
 
     fun extract(text: String): LearningSkill? {
-        val match = PATTERN.find(text) ?: return null
-        val rawJson = match.groupValues[1]
+        val rawJson = extractJsonAfterSkill(text) ?: return null
         return runCatching {
             val obj = JSONObject(rawJson)
             when (obj.optString("name", "").lowercase()) {
@@ -60,5 +86,11 @@ object SkillCallExtractor {
     }
 
     /** Strip the `SKILL: {...}` tag from text so it isn't shown to the user. */
-    fun strip(text: String): String = text.replace(PATTERN, "").trimEnd()
+    fun strip(text: String): String {
+        val jsonStart = text.indexOf("SKILL", ignoreCase = true)
+        val json = extractJsonAfterSkill(text) ?: return text
+        // Anchor on the `SKILL` token itself so we also strip the prefix + colon.
+        val cutFrom = if (jsonStart in 0..text.indexOf(json)) jsonStart else text.indexOf(json)
+        return (text.substring(0, cutFrom) + text.substring(text.indexOf(json) + json.length)).trimEnd()
+    }
 }
