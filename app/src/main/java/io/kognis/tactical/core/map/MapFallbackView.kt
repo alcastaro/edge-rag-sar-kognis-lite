@@ -24,8 +24,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Route
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -112,6 +116,12 @@ fun MapFallbackViewMulti(
     val deviceLatLon = liveGps
     // Tap-to-mark — long-press anywhere on the map opens a type picker for the tapped point.
     var pendingTapLatLon by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+    // Tap-on-marker — show delete confirmation for the tapped index.
+    var pendingDeleteIdx by remember { mutableStateOf<Int?>(null) }
+    // Route mode — when on, draws polyline + shows total path distance.
+    var routeMode by remember { mutableStateOf(false) }
+    // Total path distance in km (GPS → m1 → m2 → … → mN); recomputed each marker rebuild.
+    var totalPathKm by remember { mutableDoubleStateOf(0.0) }
 
     LaunchedEffect(Unit) {
         Configuration.getInstance()
@@ -176,11 +186,15 @@ fun MapFallbackViewMulti(
         }
     }
 
-    // Re-apply markers whenever the list changes.
-    LaunchedEffect(markers) {
+    // Re-apply markers whenever the list changes (or route mode toggles).
+    LaunchedEffect(markers, routeMode) {
         // Preserve puck across marker rebuilds (added in liveGps LaunchedEffect below).
-        mapView.overlays.removeAll { it !is Marker || (it as Marker).title != PUCK_TITLE }
+        // Preserve MapEventsOverlay (long-press handler) — it's not a Marker.
+        mapView.overlays.removeAll {
+            (it is Marker && it.title != PUCK_TITLE) || it is org.osmdroid.views.overlay.Polyline
+        }
         if (markers.isEmpty()) {
+            totalPathKm = 0.0
             deviceLatLon?.let {
                 mapView.controller.setZoom(14.0)
                 mapView.controller.setCenter(GeoPoint(it.first, it.second))
@@ -207,8 +221,41 @@ fun MapFallbackViewMulti(
                         if (distStr.isNotEmpty()) append(" · $distStr")
                     }
                     icon = cotIcons[entry.cotType]
+                    setOnMarkerClickListener { m, _ ->
+                        // Show InfoWindow on first tap. Also expose delete via Compose dialog.
+                        m.showInfoWindow()
+                        pendingDeleteIdx = idx
+                        true
+                    }
                 },
             )
+        }
+
+        // Route polyline: GPS → m1 → m2 → … → mN. Computes total path km.
+        if (routeMode) {
+            val routePoints = mutableListOf<GeoPoint>()
+            deviceLatLon?.let { routePoints.add(GeoPoint(it.first, it.second)) }
+            routePoints.addAll(points)
+            if (routePoints.size >= 2) {
+                var total = 0.0
+                for (i in 0 until routePoints.size - 1) {
+                    total += GeoUtils.haversineKm(
+                        routePoints[i].latitude, routePoints[i].longitude,
+                        routePoints[i + 1].latitude, routePoints[i + 1].longitude,
+                    )
+                }
+                totalPathKm = total
+                val poly = org.osmdroid.views.overlay.Polyline().apply {
+                    setPoints(routePoints)
+                    outlinePaint.color = android.graphics.Color.argb(220, 255, 193, 7)
+                    outlinePaint.strokeWidth = 8f
+                }
+                mapView.overlays.add(poly)
+            } else {
+                totalPathKm = 0.0
+            }
+        } else {
+            totalPathKm = 0.0
         }
         val allPoints = if (deviceLatLon != null) {
             points + GeoPoint(deviceLatLon.first, deviceLatLon.second)
@@ -254,6 +301,67 @@ fun MapFallbackViewMulti(
             factory = { mapView },
             modifier = Modifier.fillMaxSize(),
         )
+
+        // Zoom controls — left side, middle vertically.
+        Column(
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(start = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            IconButton(
+                onClick = { mapView.controller.zoomIn() },
+                modifier = Modifier
+                    .background(Color(0xCC1A1A1A), androidx.compose.foundation.shape.CircleShape)
+                    .size(36.dp),
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Zoom in", tint = io.kognis.tactical.ui.theme.RescueAmber, modifier = Modifier.size(18.dp))
+            }
+            IconButton(
+                onClick = { mapView.controller.zoomOut() },
+                modifier = Modifier
+                    .background(Color(0xCC1A1A1A), androidx.compose.foundation.shape.CircleShape)
+                    .size(36.dp),
+            ) {
+                Icon(Icons.Default.Remove, contentDescription = "Zoom out", tint = io.kognis.tactical.ui.theme.RescueAmber, modifier = Modifier.size(18.dp))
+            }
+        }
+
+        // Route mode toggle + total distance display (top-center, only when relevant)
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 6.dp)
+                .background(Color(0xCC000000), androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            IconButton(
+                onClick = { routeMode = !routeMode },
+                modifier = Modifier.size(28.dp),
+            ) {
+                Icon(
+                    Icons.Default.Route,
+                    contentDescription = if (routeMode) "Hide route" else "Show route",
+                    tint = if (routeMode) io.kognis.tactical.ui.theme.RescueAmber else Color.LightGray,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
+            if (routeMode && totalPathKm > 0.0) {
+                Text(
+                    text = "Route: ${GeoUtils.formatDistance(totalPathKm)} · ${markers.size} stops",
+                    color = io.kognis.tactical.ui.theme.RescueAmber,
+                    fontSize = 11.sp,
+                )
+            } else {
+                Text(
+                    text = if (routeMode) "Route mode" else "Show route",
+                    color = Color.LightGray,
+                    fontSize = 11.sp,
+                )
+            }
+        }
 
         // Top-left: compact count + clear row
         if (markers.isNotEmpty()) {
@@ -353,6 +461,44 @@ fun MapFallbackViewMulti(
                 .background(Color(0x88000000))
                 .padding(horizontal = 6.dp, vertical = 2.dp),
         )
+
+        // Per-marker delete confirmation: triggered by tapping any marker.
+        pendingDeleteIdx?.let { idx ->
+            val entry = markers.getOrNull(idx)
+            if (entry == null) { pendingDeleteIdx = null }
+            else {
+                androidx.compose.material3.AlertDialog(
+                    onDismissRequest = { pendingDeleteIdx = null },
+                    containerColor = Color(0xFF1A1A1A),
+                    title = { Text("Marker #${idx + 1}: ${entry.location.label}", color = Color.White) },
+                    text = {
+                        Column {
+                            Text("[${entry.cotType.symbol}] ${entry.cotType.label}", color = Color(entry.cotType.colorArgb), fontSize = 13.sp)
+                            Text("${"%.5f".format(entry.location.lat)}, ${"%.5f".format(entry.location.lon)}", color = Color.LightGray, fontSize = 11.sp)
+                            deviceLatLon?.let {
+                                val d = GeoUtils.distanceLabel(it.first, it.second, entry.location.lat, entry.location.lon)
+                                Text("Distance from you: $d", color = io.kognis.tactical.ui.theme.RescueAmber, fontSize = 11.sp)
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        androidx.compose.material3.TextButton(onClick = {
+                            MarkerStore.removeAt(idx)
+                            pendingDeleteIdx = null
+                        }) {
+                            Icon(Icons.Default.Delete, contentDescription = null, tint = Color(0xFFEF5350), modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.height(0.dp))
+                            Text("Delete", color = Color(0xFFEF5350))
+                        }
+                    },
+                    dismissButton = {
+                        androidx.compose.material3.TextButton(onClick = { pendingDeleteIdx = null }) {
+                            Text("Close", color = Color.Gray)
+                        }
+                    },
+                )
+            }
+        }
 
         // Tap-to-mark picker: triggered by long-press on map; lets operator pick SAR type.
         pendingTapLatLon?.let { (tapLat, tapLon) ->

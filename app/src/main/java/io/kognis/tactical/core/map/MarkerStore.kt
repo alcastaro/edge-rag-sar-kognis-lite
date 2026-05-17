@@ -72,5 +72,19 @@ object MarkerStore {
         _markers.clear()
     }
 
+    /** Remove single marker by index. Used by per-marker delete from map InfoWindow. */
+    fun removeAt(index: Int) {
+        if (index in _markers.indices) _markers.removeAt(index)
+    }
+
+    /** Remove single marker by content match (lat/lon/label). Returns true if removed. */
+    fun remove(lat: Double, lon: Double, label: String): Boolean {
+        val idx = _markers.indexOfFirst {
+            it.location.lat == lat && it.location.lon == lon && it.location.label == label
+        }
+        if (idx >= 0) { _markers.removeAt(idx); return true }
+        return false
+    }
+
     fun size(): Int = _markers.size
 }
