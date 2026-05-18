@@ -97,16 +97,55 @@ Rolling summary is regenerated every 8 turns by a `LearningDeriverWorker` (WorkM
 | Voice in / Voice out | Same agents drive training too. |
 | Vision agent | Future: identify image of medical equipment, route to curriculum module. |
 
+## Curriculum design — corpus-grounded modules
+
+Modules in `assets/curriculum_sar.json` are ordered by corpus support. The CURRICULUM CONTEXT picker surfaces the first module by default for new learners and falls back to lowest-mastery topics for returning learners.
+
+| # | Module | Corpus chunks | Anchor score (max) | Difficulty | Notes |
+|---|--------|---------------|--------------------|------------|-------|
+| 1 | **UNDAC mission cycle** | 789 | 0.953 | beginner | Primary demo example. 3 phases (pre/on/end), OSOCC + RDC stand-up. Fully grounded in UNDAC Field Handbook (2022). |
+| 2 | INSARAG team classification | 22 (high-quality) | 0.920 | beginner | Light / Medium / Heavy USAR structural-capability matrix. Grounded in INSARAG Guidelines Vol II Manual A. |
+| 3 | START triage | 213 | strong | beginner | 4-colour multi-casualty classification. |
+| 4 | Hazard classification | 244 | strong | beginner | Maps to Kognis 8-marker hazard taxonomy. |
+| 5 | Radio protocols (SITREP / LSAR) | 214 | strong | beginner | INSARAG-standard ordering. |
+| 6 | MARCH protocol | 0 direct | n/a | intermediate | Trauma protocol — limited direct corpus coverage. Module retained for trauma drills but the model leans on Gemma 4 baseline knowledge rather than RAG. See module summary disclaimer. |
+
+**Why UNDAC mission cycle is the primary demo example:**
+
+- 789 corpus chunks (highest coverage of any single SAR topic in the knowledge base)
+- Highest-quality anchor scores in the corpus (top 5 chunks all > 0.92)
+- Maps directly to the public UNDAC Field Handbook (2022) — judges can verify every fact against an open document
+- Concrete operational structure (3 phases × OSOCC/RDC × A&A function outputs by phase) gives the model rich, well-bounded material for adaptive teaching
+- Pairs naturally with the marker / map subsystems already in the app (OSOCC location, sectorisation, RDC at airport)
+
+**MARCH protocol notice:** the on-device corpus has zero chunks directly about MARCH. The module is retained because trauma drills are a useful teaching context, but the model will pull from Gemma 4's baseline trauma knowledge, not RAG. For fully-grounded sessions prefer UNDAC mission cycle or INSARAG team classification.
+
+## Adaptive teaching flow (S28+)
+
+System prompt rules (see `LearningPromptBuilder.kt`) enforce:
+
+- **R1** Always advance — short acks ("ok", "yes", "continue") trigger the NEXT chunk, never a recap
+- **R2** Banned filler openers (specific phrases like "I see you are ready…", "Since we were just starting…")
+- **R3** Substance first — 3–6 sentences of concrete content per turn, no meta-talk
+- **R4** Anti-repetition — check last 3 assistant turns; rewrite if content/opener/example duplicates
+- **R5** Quiz answer feedback + escalation — `[QUIZ ANSWER]` tag triggers 1-sentence feedback + next chunk + difficulty escalation
+- **R6** Default flow = explanation + inline `**Quick check:**` text question (cheap, fast verification)
+- **R7** Formal `SKILL: quiz_user` card ONLY when learner explicitly asks ("quiz me", "test me") or after 2+ inline checks on the current topic
+- **R8** `What next?` block (3 numbered next-move options) on non-quiz, non-inline-check turns
+- **R9** Adaptive topic rotation — after 3 turns on the same topic with rising mastery, pivot to a low-mastery topic from CURRICULUM CONTEXT sibling list
+- **R10** Use CURRICULUM CONTEXT — paraphrase real case studies and quiz seeds; do not invent material outside that context
+
 ## Demo flow
 
 1. Gear menu → **Start training**. Curriculum loads from `assets/curriculum_sar.json`.
-2. Learner says or types: "I want to review MARCH protocol."
-3. Gemma 4 E2B reads the learner model (empty on first turn) + curriculum module + writes a learning plan. Emits a `show_example` skill call.
-4. App renders the case study card. Learner reads it, asks a follow-up: "Why is tourniquet before airway?"
-5. Gemma 4 explains using the corpus. Emits `quiz_user`. App renders 4 options.
-6. Learner taps wrong option. App writes a `LearningFact` (correct=false). The next prompt's learner-model section flags MARCH-tourniquet as a low-mastery topic.
-7. After 8 turns: WorkManager runs `LearningDeriverWorker` → rolling summary + facts extracted.
-8. Learner ends session. Cross-session promotion fires. Next time, the session opens with `review_past_misses` surfacing the previously-failed step.
+2. Learner says or types: "Teach me the UNDAC mission cycle."
+3. Gemma 4 E2B reads the learner model (empty on first turn) + UNDAC module + delivers the 3-phase overview inline, anchored on real corpus chunks. Closes with `**Quick check:** Which phase covers OSOCC stand-up?`.
+4. Learner replies: "On-mission." Model gives 1-sentence feedback, delivers next chunk on OSOCC vs RDC roles, closes with a new Quick check.
+5. After 2 inline checks the learner says "quiz me." Model emits `SKILL: quiz_user` with a 4-option card pulled from the UNDAC module's quiz seeds. QuizCard renders.
+6. Learner taps wrong option. App writes a `LearningFact` (correct=false) AND sends a synthetic `[QUIZ ANSWER]` message back to the model with topic + selected option + correct option + result. Next prompt's R5 path triggers: 1-sentence feedback explaining WHY the correct answer is correct + next chunk + escalated quiz.
+7. After 3 turns on UNDAC with rising mastery, R9 fires: model announces "You've got UNDAC fundamentals — let's move to INSARAG team classification" and pivots.
+8. After 8 turns: WorkManager runs `LearningDeriverWorker` → rolling summary + facts extracted.
+9. Learner ends session. Cross-session promotion fires. Next time, the session opens with `review_past_misses` surfacing the previously-failed step.
 
 ## What this is NOT
 

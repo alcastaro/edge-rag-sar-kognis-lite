@@ -415,7 +415,21 @@ class MainActivity : ComponentActivity() {
                 val skill = io.kognis.tactical.core.learning.SkillCallExtractor.extract(text)
                 // Strip raw SKILL: {...} JSON from the displayed chat message; the rendered
                 // QuizCard / CaseStudyCard is the user-facing artifact.
-                val stripped = io.kognis.tactical.core.learning.SkillCallExtractor.strip(text)
+                var stripped = io.kognis.tactical.core.learning.SkillCallExtractor.strip(text)
+                // Fallback: if the model emitted ONLY a SKILL tag (stripped text is blank),
+                // synthesize a short lead-in so the chat doesn't show an empty bubble.
+                if (stripped.isBlank() && skill != null) {
+                    stripped = when (skill) {
+                        is io.kognis.tactical.core.learning.LearningSkill.QuizUser ->
+                            "Quiz on ${skill.topic} — pick the right answer below."
+                        is io.kognis.tactical.core.learning.LearningSkill.ShowExample ->
+                            "Case study on ${skill.topic} — see card below."
+                        is io.kognis.tactical.core.learning.LearningSkill.ReviewPastMisses ->
+                            "Reviewing what we missed last time."
+                        is io.kognis.tactical.core.learning.LearningSkill.MarkMastery ->
+                            "Progress recorded on ${skill.topic}."
+                    }
+                }
                 if (stripped != text) {
                     runOnUiThread {
                         val hist = (chatMessageHistory.value ?: listOf()).toMutableList()
@@ -2215,8 +2229,20 @@ class MainActivity : ComponentActivity() {
                                         options = q.options,
                                         correctIndex = q.correctIndex,
                                         explanation = q.explanation,
-                                        onAnswer = { correct, topic ->
+                                        onAnswer = { correct, topic, idx ->
                                             fieldCore?.recordQuizOutcome(topic, correct)
+                                            // Submit answer back to the model so it gives feedback + next chunk.
+                                            // Tagged with [QUIZ ANSWER] so the system prompt R5 picks it up.
+                                            val selected = q.options.getOrNull(idx) ?: ""
+                                            val correctOpt = q.options.getOrNull(q.correctIndex) ?: ""
+                                            val resultTag = if (correct) "CORRECT" else "INCORRECT"
+                                            val letter = ('A' + idx)
+                                            val feedbackMsg = if (currentLanguage == "en") {
+                                                "[QUIZ ANSWER] Topic: ${q.topic}. Q: ${q.question} | I picked $letter: \"$selected\". Correct: \"$correctOpt\". Result: $resultTag. Give brief feedback, then teach the next chunk + a fresh quiz."
+                                            } else {
+                                                "[RESPUESTA QUIZ] Tema: ${q.topic}. P: ${q.question} | Elegí $letter: \"$selected\". Correcta: \"$correctOpt\". Resultado: $resultTag. Da feedback breve, luego enseña el siguiente bloque + un quiz nuevo."
+                                            }
+                                            sendText(feedbackMsg)
                                         },
                                         onDismiss = { pendingQuiz = null },
                                     )

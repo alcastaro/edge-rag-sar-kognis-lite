@@ -48,7 +48,7 @@ fun QuizCard(
     options: List<String>,
     correctIndex: Int,
     explanation: String,
-    onAnswer: (correct: Boolean, topic: String) -> Unit,
+    onAnswer: (correct: Boolean, topic: String, selectedIdx: Int) -> Unit,
     onDismiss: () -> Unit = {},
 ) {
     var selected by remember { mutableStateOf<Int?>(null) }
@@ -118,7 +118,7 @@ fun QuizCard(
                             .border(1.dp, borderColor, RoundedCornerShape(10.dp))
                             .clickable(enabled = selected == null) {
                                 selected = idx
-                                onAnswer(idx == correctIndex, topic)
+                                onAnswer(idx == correctIndex, topic, idx)
                             }
                             .padding(horizontal = 12.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,

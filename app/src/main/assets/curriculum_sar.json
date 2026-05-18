@@ -1,48 +1,113 @@
 {
   "id": "insarag-iec-2024",
-  "title": "INSARAG IEC-aligned SAR fundamentals",
+  "title": "INSARAG / UNDAC SAR fundamentals — corpus-grounded curriculum",
   "language": "es",
-  "version": 1,
+  "version": 2,
   "modules": [
     {
-      "id": "march",
-      "topic": "MARCH protocol",
-      "difficulty": "intermediate",
-      "summary": "Massive bleeding control · Airway · Respiration · Circulation · Head/Hypothermia. Combat-derived trauma protocol adopted by INSARAG medical teams for crush injuries and complex extrications.",
+      "id": "undac-mission-cycle",
+      "topic": "UNDAC mission cycle",
+      "difficulty": "beginner",
+      "summary": "United Nations Disaster Assessment and Coordination (UNDAC) team operations follow three interrelated phases: pre-mission, on-mission, and mission-end. On deployment, UNDAC may stand up two coordination centres: OSOCC (On-Site Operations Coordination Centre) and RDC (Reception Departure Centre). Grounded in the UNDAC Field Handbook (2022). 789 corpus chunks support this topic — the highest-coverage subject in the knowledge base.",
       "case_studies": [
         {
-          "id": "march-01",
-          "text": "M6.8 earthquake. 3-story collapse. Adult male, ~40 yrs, lower-limb crush under concrete slab. Pulse 130, RR 28, conscious but pale. Distal pulse absent on the trapped leg. Estimated 4 hours of entrapment. Team has 18 minutes before extrication risk for crush syndrome increases.",
+          "id": "undac-01",
+          "text": "M7.2 earthquake strikes a coastal city in Hispaniola at 02:14 local. Government issues a request for international assistance within 4 hours. You are an UNDAC team member on the global roster. Activation message arrives at 06:00. Wheels-up target is 24 hours. Pre-mission phase: passport + vaccinations current, go-bag ready, family notified, briefing scheduled with OCHA Geneva.",
           "key_points": [
-            "tourniquet applied above injury proximal to bleed site",
-            "distal pulse re-checked within 60 seconds post-application",
-            "tourniquet application time recorded on patient skin or tag",
-            "fluid resuscitation prepared BEFORE extrication for crush syndrome"
+            "Pre-mission phase = activation + travel preparation. Closes when wheels-up.",
+            "OCHA Geneva briefs the team with situation report, host-state context, security level.",
+            "Personal readiness items (passport, vaccinations, INSARAG ID card) must be current at all times — verified during alert, not deployment.",
+            "Travel orders, per-diem, and visas handled by OCHA — UNDAC member focuses on operational readiness."
           ]
         },
         {
-          "id": "march-02",
-          "text": "Building fire, partial collapse. Adult female, 30s, head laceration with arterial bleed. GCS 12, agitated. Airway patent but laboured. Smoke inhalation suspected.",
+          "id": "undac-02",
+          "text": "First UNDAC element lands at SDQ (Las Américas) 26 hours post-quake. Three INSARAG-classified Heavy USAR teams en route. Local government cooperative but overwhelmed. Team Leader decides to stand up an RDC at the airport BEFORE convoy to OSOCC site, because international teams will start arriving within 6 hours. RDC handles team registration, customs, briefing, then forwards to OSOCC for tasking.",
           "key_points": [
-            "direct pressure + hemostatic gauze on scalp arterial bleed",
-            "early SpO2 monitoring for carbon monoxide concern",
-            "C-spine precaution maintained during airway management",
-            "transport to advanced medical post within golden hour"
+            "RDC is the first-touch point for arriving international teams — at airport or port of entry.",
+            "OSOCC coordinates on-site response: tasking, sectorisation, daily briefings.",
+            "Both centres must establish a daily-briefing rhythm and shared information protocol (typically morning brief + evening sitrep).",
+            "RDC support role requires logistics expertise (manifests, IATA dangerous-goods, customs), not just registration.",
+            "On-mission phase closes when host-state lead is restored or the situation no longer warrants UN coordination."
           ]
         }
       ],
       "quiz_seeds": [
         {
-          "prompt": "In MARCH, what is the FIRST action for a catastrophic limb hemorrhage?",
-          "options": ["Open the airway", "Apply tourniquet proximal to wound", "Start IV fluids", "Position for shock"],
+          "prompt": "What are the three interrelated phases of an UNDAC mission cycle?",
+          "options": [
+            "Activation · Deployment · Demobilisation",
+            "Pre-mission · On-mission · Mission-end",
+            "Alert · Response · Recovery",
+            "Briefing · Operations · After-Action"
+          ],
           "correct_index": 1,
-          "explanation": "Massive bleeding kills fastest. Tourniquet placement BEFORE airway is the MARCH ordering — preventable mortality is dominated by uncontrolled hemorrhage in field trauma."
+          "explanation": "UNDAC Field Handbook §3.1 defines the cycle as pre-mission (alert + readiness), on-mission (in-country coordination), and mission-end (handover + after-action). 'Activation/Deployment/Demob' is the INSARAG USAR cycle — different concept."
         },
         {
-          "prompt": "After tourniquet application, what time-critical action is required?",
-          "options": ["Loosen the tourniquet every 15 minutes", "Record application time on the patient", "Cover the tourniquet to reduce shock", "Replace with a pressure dressing within 5 minutes"],
+          "prompt": "Which UNDAC-established centre is the FIRST-touch point for arriving international USAR teams?",
+          "options": [
+            "OSOCC (On-Site Operations Coordination Centre)",
+            "RDC (Reception Departure Centre)",
+            "EOC (Emergency Operations Centre)",
+            "ICP (Incident Command Post)"
+          ],
           "correct_index": 1,
-          "explanation": "The receiving team needs the application time to decide on extended-care management. Never loosen a tourniquet in the field without surgical capability."
+          "explanation": "The RDC is established at the port of entry (airport or land border) by the first-arriving international personnel — often USAR, EMT, or UNDAC members. It records incoming teams, handles customs/visas, then forwards them to the OSOCC for tasking."
+        },
+        {
+          "prompt": "During an UNDAC mission, the Assessment & Analysis (A&A) function delivers outputs across phases. The Phase I priority outputs are:",
+          "options": [
+            "Situation analysis + exposure estimates",
+            "Recovery framework + cluster-coordination plan",
+            "Caseload estimation + humanitarian profile",
+            "Mission-end report + lessons learned"
+          ],
+          "correct_index": 0,
+          "explanation": "Phase I (first 72 hrs) outputs are situation analysis and exposure estimates. Caseload estimations and humanitarian profile come in Phase II. The recovery framework is later. Source: UNDAC Field Handbook p.115."
+        }
+      ]
+    },
+    {
+      "id": "insarag-team-class",
+      "topic": "INSARAG team classification (Light/Medium/Heavy USAR)",
+      "difficulty": "beginner",
+      "summary": "INSARAG External Classification (IEC) ranks international USAR teams by structural capability: Light handles wood, masonry, and light reinforced concrete; Medium adds heavy wood, lightweight steel, and reinforced masonry; Heavy adds heavy-wall reinforced concrete and steel structures. Classification governs the type of collapse a team is authorised to operate on and drives task allocation at the OSOCC.",
+      "case_studies": [
+        {
+          "id": "iec-01",
+          "text": "OSOCC receives a request for tasking on a 6-storey reinforced-concrete office tower with progressive pancake collapse. Three teams are available: a Light team (just landed), a Medium team (already on a different site, can rotate), and a Heavy team (in convoy, ETA 90 min). The Sector Coordinator must choose.",
+          "key_points": [
+            "Light USAR is NOT authorised for heavy-wall reinforced concrete — collapse type exceeds capability.",
+            "Medium USAR can intervene on reinforced masonry and lightweight steel but is at the edge for heavy reinforced concrete.",
+            "Heavy USAR is the appropriate match for heavy-wall RC and steel structures.",
+            "Correct decision: hold the Light team for lighter-construction sites; let Medium stabilise/recon while Heavy convoys in.",
+            "Always match classification to structure type — mismatch risks responder casualties + secondary collapse."
+          ]
+        }
+      ],
+      "quiz_seeds": [
+        {
+          "prompt": "A Heavy USAR team is REQUIRED (not just preferred) when the collapse involves:",
+          "options": [
+            "Wood-frame single-storey houses",
+            "Reinforced masonry 2-storey buildings",
+            "Heavy-wall reinforced concrete or steel structures",
+            "Lightweight steel warehouses"
+          ],
+          "correct_index": 2,
+          "explanation": "Heavy USAR classification mandates capability on heavy-wall reinforced concrete and steel — Medium and Light teams are NOT authorised on these structures. INSARAG Guidelines Vol II Manual A defines the structural-capability matrix."
+        },
+        {
+          "prompt": "A Light USAR team's authorised structural scope includes:",
+          "options": [
+            "Wood, masonry, and light reinforced concrete only",
+            "Anything except heavy-wall steel",
+            "Heavy wood and reinforced masonry",
+            "All collapse types — Light refers to deployment speed, not capability"
+          ],
+          "correct_index": 0,
+          "explanation": "Light USAR is bounded to wood, masonry, and LIGHT reinforced concrete. Heavy wood and reinforced masonry require Medium classification. 'Light' refers to structural-capability ceiling, not response speed."
         }
       ]
     },
@@ -50,7 +115,7 @@
       "id": "triage-start",
       "topic": "START triage",
       "difficulty": "beginner",
-      "summary": "Simple Triage And Rapid Treatment. 4-color casualty classification used at multi-casualty incidents: RED (immediate), YELLOW (delayed), GREEN (walking wounded), BLACK (deceased or expectant).",
+      "summary": "Simple Triage And Rapid Treatment. 4-color casualty classification used at multi-casualty incidents: RED (immediate), YELLOW (delayed), GREEN (walking wounded), BLACK (deceased or expectant). 213 corpus chunks cover triage methods (START + SALT).",
       "case_studies": [
         {
           "id": "triage-01",
@@ -83,7 +148,7 @@
       "id": "hazard-types",
       "topic": "Hazard classification",
       "difficulty": "beginner",
-      "summary": "Eight SAR hazard categories used in Kognis Lite marker types: VICTIM, MEDICAL, HAZARD (structural · chemical · fire · flood), COMMAND, EXTRACTION, MISSING, BASE, WATER. Correct classification at the marker level drives downstream resource allocation.",
+      "summary": "Eight SAR hazard categories used in Kognis Lite marker types: VICTIM, MEDICAL, HAZARD (structural · chemical · fire · flood), COMMAND, EXTRACTION, MISSING, BASE, WATER. Correct classification at the marker level drives downstream resource allocation. 244 corpus chunks cover hazard identification.",
       "case_studies": [
         {
           "id": "hazard-01",
@@ -106,36 +171,10 @@
       ]
     },
     {
-      "id": "extraction-lz",
-      "topic": "Helicopter LZ selection",
-      "difficulty": "intermediate",
-      "summary": "Helicopter Landing Zone criteria for medevac and resource insertion: minimum size 30m × 30m for medium utility, surface firmness, slope < 7°, clear of overhead obstacles (>15m radius), prevailing wind alignment, ground crew protocol.",
-      "case_studies": [
-        {
-          "id": "lz-01",
-          "text": "Earthquake response. Need to evacuate two RED casualties. Available terrain: a school football field (40m × 60m, grass, minor debris), a paved parking lot (35m × 35m, ringed by 8m streetlights), and an open hillside (slope ~12°, no obstructions).",
-          "key_points": [
-            "school field is best — size + surface + no overhead",
-            "parking lot rejected: 8m streetlights are within rotor wash radius",
-            "hillside rejected: slope > 7° unsafe for skid landing",
-            "remove all debris from chosen LZ before approach call"
-          ]
-        }
-      ],
-      "quiz_seeds": [
-        {
-          "prompt": "The MINIMUM safe LZ size for a medium utility helicopter (e.g. UH-60) on a SAR operation is:",
-          "options": ["10m × 10m", "20m × 20m", "30m × 30m", "50m × 50m"],
-          "correct_index": 2,
-          "explanation": "30m × 30m is the INSARAG minimum for medium utility. Larger is always preferred; smaller is acceptable only for light helicopters in true emergency."
-        }
-      ]
-    },
-    {
       "id": "comms-radio",
       "topic": "Radio protocols",
       "difficulty": "beginner",
-      "summary": "SITREP structure, callsign discipline, brevity codes used by INSARAG / UNDAC field teams. Standard formats prevent ambiguity under stress, low signal, multilingual teams.",
+      "summary": "SITREP structure, callsign discipline, brevity codes used by INSARAG / UNDAC field teams. Standard formats prevent ambiguity under stress, low signal, multilingual teams. 214 corpus chunks support comms training.",
       "case_studies": [
         {
           "id": "comms-01",
@@ -159,6 +198,38 @@
           ],
           "correct_index": 1,
           "explanation": "Location-Situation-Activity-Request (LSAR) is the INSARAG-standard ordering. Location FIRST anchors the report; request LAST so the receiver has full context before deciding."
+        }
+      ]
+    },
+    {
+      "id": "march",
+      "topic": "MARCH protocol",
+      "difficulty": "intermediate",
+      "summary": "Massive bleeding control · Airway · Respiration · Circulation · Head/Hypothermia. Combat-derived trauma protocol used by INSARAG medical teams for crush injuries and complex extrications. NOTE: this topic has limited direct coverage in the on-device corpus — the model leans on Gemma 4 baseline trauma knowledge. Prefer UNDAC mission cycle or INSARAG team classification for fully grounded sessions.",
+      "case_studies": [
+        {
+          "id": "march-01",
+          "text": "M6.8 earthquake. 3-story collapse. Adult male, ~40 yrs, lower-limb crush under concrete slab. Pulse 130, RR 28, conscious but pale. Distal pulse absent on the trapped leg. Estimated 4 hours of entrapment. Team has 18 minutes before extrication risk for crush syndrome increases.",
+          "key_points": [
+            "tourniquet applied above injury proximal to bleed site",
+            "distal pulse re-checked within 60 seconds post-application",
+            "tourniquet application time recorded on patient skin or tag",
+            "fluid resuscitation prepared BEFORE extrication for crush syndrome"
+          ]
+        }
+      ],
+      "quiz_seeds": [
+        {
+          "prompt": "In MARCH, what is the FIRST action for a catastrophic limb hemorrhage?",
+          "options": ["Open the airway", "Apply tourniquet proximal to wound", "Start IV fluids", "Position for shock"],
+          "correct_index": 1,
+          "explanation": "Massive bleeding kills fastest. Tourniquet placement BEFORE airway is the MARCH ordering — preventable mortality is dominated by uncontrolled hemorrhage in field trauma."
+        },
+        {
+          "prompt": "After tourniquet application, what time-critical action is required?",
+          "options": ["Loosen the tourniquet every 15 minutes", "Record application time on the patient", "Cover the tourniquet to reduce shock", "Replace with a pressure dressing within 5 minutes"],
+          "correct_index": 1,
+          "explanation": "The receiving team needs the application time to decide on extended-care management. Never loosen a tourniquet in the field without surgical capability."
         }
       ]
     }
