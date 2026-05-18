@@ -205,20 +205,54 @@
       "id": "march",
       "topic": "MARCH protocol",
       "difficulty": "intermediate",
-      "summary": "Massive bleeding control · Airway · Respiration · Circulation · Head/Hypothermia. Combat-derived trauma protocol used by INSARAG medical teams for crush injuries and complex extrications. NOTE: this topic has limited direct coverage in the on-device corpus — the model leans on Gemma 4 baseline trauma knowledge. Prefer UNDAC mission cycle or INSARAG team classification for fully grounded sessions.",
+      "summary": "ITS MARCH — primary-survey mnemonic for tactical trauma: Immediate Threats · Tourniquet/Tactical environment · Stop bleeding · Massive hemorrhage · Airway · Respiration · Circulation · Head/Hypothermia. Combat-derived (TECC/TCCC/KATT) protocol used by INSARAG medical teams for crush injuries, complex extrications, and field trauma. 22 corpus chunks (MARCH-TECC-TCCC-KATT pocket guide) ground this module.",
       "case_studies": [
         {
           "id": "march-01",
           "text": "M6.8 earthquake. 3-story collapse. Adult male, ~40 yrs, lower-limb crush under concrete slab. Pulse 130, RR 28, conscious but pale. Distal pulse absent on the trapped leg. Estimated 4 hours of entrapment. Team has 18 minutes before extrication risk for crush syndrome increases.",
           "key_points": [
-            "tourniquet applied above injury proximal to bleed site",
-            "distal pulse re-checked within 60 seconds post-application",
-            "tourniquet application time recorded on patient skin or tag",
-            "fluid resuscitation prepared BEFORE extrication for crush syndrome"
+            "Apply tourniquet proximal to the bleed site, between wound and heart",
+            "After application: distal pulse re-checked within 60 seconds; if pulse present, tighten further",
+            "Record tourniquet time on patient skin / forehead / tag",
+            "Fluid resuscitation prepared BEFORE extrication for crush-syndrome prevention",
+            "Brachial-style proximal pressure (hands around limb at midpoint) is the bridge while tourniquet is sourced"
+          ]
+        },
+        {
+          "id": "march-02",
+          "text": "Pancake collapse. Adult female, ~35 yrs, blunt chest trauma + open chest wound 4cm right hemithorax. Conscious, RR 32 laboured, SpO2 dropping. Assess using FLASH then seal.",
+          "key_points": [
+            "FLASH chest mnemonic: Feel (deformity / crepitus) · Look (paradox / open wound) · Armpits · Search the back · Holes",
+            "Open chest wound: seal IMMEDIATELY with hand first, then commercial occlusive (chest seal)",
+            "If respiratory status worsens AFTER seal applied → suspect tension pneumothorax → BURP the dressing (briefly lift to release pressure)",
+            "Position for max respiratory effort (sitting / lateral with injured side down per local protocol)",
+            "Reassess continuously — every 5 min minimum for chest trauma"
+          ]
+        },
+        {
+          "id": "march-03",
+          "text": "Building fire, secondary collapse. Adult male, ~25, partial-thickness burns covering right arm, chest, and abdomen. Conscious. Smell of accelerant. Clothing still smouldering.",
+          "key_points": [
+            "STOP the burning process FIRST — smother / remove from heat source",
+            "Cool affected area with water for ≥10 min (longer for chemical burns)",
+            "Remove loose burnt clothing + jewellery (rings, watches) BEFORE swelling sets in",
+            "Estimate TBSA using Rule of Palms: casualty's own palm including fingers ≈ 1% TBSA",
+            "Cover with light clean dressing AFTER cooling; lay flat + keep warm to manage shock"
           ]
         }
       ],
       "quiz_seeds": [
+        {
+          "prompt": "The tactical-environment primary-survey mnemonic taught in the MARCH pocket guide is:",
+          "options": [
+            "ABCDE",
+            "ITS MARCH",
+            "SAMPLE",
+            "AVPU"
+          ],
+          "correct_index": 1,
+          "explanation": "ITS MARCH is the structured primary-survey protocol used in tactical / field trauma. ABCDE is the civilian-trauma equivalent; SAMPLE is a history mnemonic; AVPU is a consciousness scale. (Source: MARCH-TECC-TCCC-KATT pocket guide p.3)"
+        },
         {
           "prompt": "In MARCH, what is the FIRST action for a catastrophic limb hemorrhage?",
           "options": ["Open the airway", "Apply tourniquet proximal to wound", "Start IV fluids", "Position for shock"],
@@ -230,6 +264,40 @@
           "options": ["Loosen the tourniquet every 15 minutes", "Record application time on the patient", "Cover the tourniquet to reduce shock", "Replace with a pressure dressing within 5 minutes"],
           "correct_index": 1,
           "explanation": "The receiving team needs the application time to decide on extended-care management. Never loosen a tourniquet in the field without surgical capability."
+        },
+        {
+          "prompt": "The FLASH mnemonic for chest-trauma assessment stands for:",
+          "options": [
+            "Feel · Look · Armpits · Search the back · Holes",
+            "Fast · Listen · Auscultate · Search · Hands",
+            "Find · Locate · Apply · Seal · Hold",
+            "Fluids · Lift · Apply · Stabilise · Handover"
+          ],
+          "correct_index": 0,
+          "explanation": "FLASH is the structured chest-assessment protocol: Feel (deformity/crepitus), Look (paradox/wound), Armpits (occult wounds), Search the back (entry/exit), Holes (open wounds). Pocket guide p.10."
+        },
+        {
+          "prompt": "After applying an occlusive chest seal, the casualty's breathing WORSENS. The next action is:",
+          "options": [
+            "Apply a second seal alongside the first",
+            "Burp the dressing — briefly lift one corner to release built-up pressure",
+            "Remove the seal completely and pack the wound",
+            "Begin chest compressions"
+          ],
+          "correct_index": 1,
+          "explanation": "Worsening respiration after seal application suggests tension pneumothorax developing under the seal. BURPING (briefly lifting to vent) releases the pressure without losing the seal. Pocket guide p.11."
+        },
+        {
+          "prompt": "Using the Rule of Palms for burn assessment, the casualty's own palm INCLUDING the fingers represents approximately:",
+          "options": ["0.5% TBSA", "1% TBSA", "5% TBSA", "10% TBSA"],
+          "correct_index": 1,
+          "explanation": "One palm including fingers ≈ 1% Total Body Surface Area. Fast on-scene estimation method. Pocket guide p.16."
+        },
+        {
+          "prompt": "The standard mnemonic for casualty handover to receiving medical care is:",
+          "options": ["MARCH", "ATMIST-Vital Signs", "SAMPLE", "AVPU"],
+          "correct_index": 1,
+          "explanation": "ATMIST-Vital Signs: Age · Time of incident · Mechanism · Injuries · Signs/symptoms · Treatment given · Vital signs. Standardised across UK/EU prehospital and INSARAG medical teams. Pocket guide p.17."
         }
       ]
     }
