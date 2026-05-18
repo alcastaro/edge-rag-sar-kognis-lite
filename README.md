@@ -1,7 +1,7 @@
 # Kognis Lite — Offline Humanitarian Field Assistant
 
 > 📱 **APK release:** **[v1.0-hackathon](https://github.com/alcastaro/kjognis-lite/releases/tag/v1.0-hackathon)** (~272 MB · install via `adb install -r`)
-> 🎥 Demo video: _(YouTube link added before submission)_
+> 🎥 Demo video playlist: https://www.youtube.com/playlist?list=PLcAvstgQ4zAGQY4mAhssH_2O0q8L4y5n_
 > 📓 Notebook companion: [`notebooks/kognis_lite_sar_demo.ipynb`](./notebooks/kognis_lite_sar_demo.ipynb)
 > 📄 Submission writeup: [`KAGGLE_WRITEUP.md`](./KAGGLE_WRITEUP.md)
 > 🚀 Judges quickstart: [`HACKATHON.md`](./HACKATHON.md)
